@@ -1,0 +1,84 @@
+# Build outputs
+bin/
+obj/
+out/
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.userprefs
+*.rsuser
+
+# IDE specific
+.vs/
+.idea/
+.vscode/*
+
+# Rider
+*.sln.iml
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuspec
+packages/
+.nuget/
+
+# Logs
+*.log
+
+# OS generated
+[Dd]esktop.ini
+[Tt]humbs.db
+ehthumbs.db
+$RECYCLE.BIN/
+
+# Dotnet specific
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# EF Core
+*Migrations/
+
+# Tye / dotnet tools
+.tye/
+.dotnet-tools/
+
+# Coverage / Testing
+coverage/
+*.coverage
+*.coveragexml
+TestResults/
+*.trx
+*.cov
+*.opencover.xml
+*.coveragejson
+
+# Docker
+**/docker-compose.override.yml
+**/docker-compose.vs.debug.yml
+**/docker-compose.vs.release.yml
+docker-compose.dcproj
+.docker/
+.dockerignore
+
+# Secrets
+secrets.json
+appsettings.Development.json
+.env
+.env.*
+
+# Publish
+publish/
+*.pubxml
+*.publishproj

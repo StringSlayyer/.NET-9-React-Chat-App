@@ -1,0 +1,52 @@
+services:
+  chat.api:
+    image: ${DOCKER_REGISTRY-}chatapi
+    build:
+      context: .
+      dockerfile: Chat.API/Dockerfile
+    container_name: chatapi
+    depends_on:
+      - database
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    networks:
+      - postgres-network
+
+  database:
+    image: postgres:latest
+    container_name: chatapp-db
+    restart: always
+    ports:
+        - 5432:5432
+    env_file:
+        - .env
+    networks:
+        - postgres-network
+    volumes:
+        - chatapp_data:/var/lib/postgresql/data/
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    ports:
+     - 15433:80 
+    env_file:
+     - .env
+    depends_on:
+     - database
+    networks:
+     - postgres-network
+    volumes:
+    - pgadmin_data:/var/lib/pgadmin
+
+
+volumes:
+    chatapp_data:
+    pgadmin_data:
+
+networks:
+   postgres-network:
+     driver: bridge
