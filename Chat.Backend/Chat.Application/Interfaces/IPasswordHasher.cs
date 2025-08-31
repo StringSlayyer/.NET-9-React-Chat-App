@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Chat.Application.Interfaces
 {
-    public interface ITokenService
+    public interface IPasswordHasher
     {
-        string GenerateToken(Guid userId);
-        int GetUserIdFromClaimsPrincipal(ClaimsPrincipal user);
+        bool VerifyPassword(string password, string hashedPassword);
+        string HashPassword(string password);
+
     }
 }
