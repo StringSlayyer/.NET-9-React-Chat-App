@@ -10,6 +10,6 @@ namespace Chat.Application.Interfaces
     public interface ITokenService
     {
         string GenerateToken(Guid userId);
-        int GetUserIdFromClaimsPrincipal(ClaimsPrincipal user);
+        Guid GetUserIdFromClaimsPrincipal(ClaimsPrincipal user);
     }
 }

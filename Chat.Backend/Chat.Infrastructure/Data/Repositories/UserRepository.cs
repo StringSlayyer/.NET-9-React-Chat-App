@@ -1,5 +1,6 @@
 ﻿using Chat.Application.Interfaces;
 using Chat.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,19 +22,27 @@ namespace Chat.Infrastructure.Data.Repositories
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<User>> GetAllUsersAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            return await _context.Users.AsNoTracking().ToListAsync(cancellationToken);
         }
 
-        public Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+            return user;
         }
 
-        public Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
+        public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+            return user;
+        }
+
+        public async Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
+        {
+            var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
+            return user;
         }
     }
 }

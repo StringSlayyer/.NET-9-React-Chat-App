@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using DotNetEnv;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Chat.Application;
 
 
 namespace Chat.API
@@ -16,30 +18,49 @@ namespace Chat.API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+
+            Env.Load();
+            builder.Configuration.AddEnvironmentVariables();
             builder.Services.AddInfrastructure(builder.Configuration);
+            builder.Services.AddApplication();
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
-            builder.Services.AddAuthorization();
-            builder.Services.AddAuthentication();
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                { 
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["JWT_ISSUER"],
+                        ValidAudience = builder.Configuration["JWT_AUDIENCE"],
+                        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT_SECRET_KEY"]))
+                    };
+                }
+            );
 
-            Env.Load();
-            builder.Configuration.AddEnvironmentVariables();
+
+            builder.Services.AddAuthorization();
+
 
 
 
             var app = builder.Build();
 
            
-            app.MapOpenApi();
             app.UseSwaggerUI(options =>
             {
+
                 options.SwaggerEndpoint("/openapi/v1.json", "v1");
             });
 
 
+            app.MapOpenApi();
             app.UseAuthorization();
 
 

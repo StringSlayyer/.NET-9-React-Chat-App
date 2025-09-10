@@ -13,5 +13,7 @@ namespace Chat.Application.DTOs
         public string Email { get; set; } = null!;
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public DateTime? CreatedAt { get; set; }
+
     }
 }

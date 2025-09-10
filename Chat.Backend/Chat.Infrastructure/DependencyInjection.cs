@@ -1,5 +1,6 @@
 ﻿using Chat.Application.Interfaces;
 using Chat.Infrastructure.Data;
+using Chat.Infrastructure.Data.Repositories;
 using Chat.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,9 @@ namespace Chat.Infrastructure
                 options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
             services.AddScoped<IPasswordHasher, PasswordHasher>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IMessageRepository, MessageRepository>();
+            services.AddScoped<ITokenService, TokenService>();
             return services;
         }
     }

@@ -13,6 +13,6 @@ namespace Chat.Domain.Entities
         public Guid ReceiverId { get; set; }
         public string Content { get; set; }
         public DateTime SentAt { get; set; } = DateTime.UtcNow;
-        public bool IsRead { get; set; }
+        public bool IsRead { get; set; } = false;
     }
 }

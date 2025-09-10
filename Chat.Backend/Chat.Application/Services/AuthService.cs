@@ -22,13 +22,29 @@ namespace Chat.Application.Services
             _tokenService = tokenService;
         }
 
-        public Task<TokenResponse> LoginAsync(string username, string password, CancellationToken cancellationToken = default)
+        public async Task<TokenResponse> LoginAsync(string username, string password, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            if(string.IsNullOrWhiteSpace(username)) throw new ArgumentException("Username is required", nameof(username));
+            if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Password is required", nameof(password));
+
+            var user = await _userRepository.GetByUsernameAsync(username, cancellationToken);
+            if(user == null || !_passwordHasher.VerifyPassword(user.Password, password))
+            {
+                throw new UnauthorizedAccessException("Invalid username or password");
+            }
+            var token = new TokenResponse { Token = _tokenService.GenerateToken(user.Id) };
+            return token;
+
         }
 
         public async Task<TokenResponse> RegisterAsync(RegistrationDTO model, CancellationToken cancellationToken = default)
         {
+            if (model == null) throw new ArgumentNullException(nameof(model));
+            if (string.IsNullOrWhiteSpace(model.Username)) throw new ArgumentException("Username is required", nameof(model.Username));
+            if (string.IsNullOrWhiteSpace(model.Email)) throw new ArgumentException("Email is required", nameof(model.Email));
+            if (string.IsNullOrWhiteSpace(model.Password)) throw new ArgumentException("Password is required", nameof(model.Password));
+            if (model.Password.Length < 6) throw new ArgumentException("Password must be at least 6 characters long", nameof(model.Password));
+
             User user = new User
             {
                 Id = Guid.NewGuid(),
