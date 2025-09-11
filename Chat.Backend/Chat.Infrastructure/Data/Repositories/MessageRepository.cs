@@ -22,13 +22,19 @@ namespace Chat.Infrastructure.Data.Repositories
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<Message>> GetConversationAsync(Guid user1Id, Guid user2Id, CancellationToken cancellationToken = default)
+        public Task<Message?> GetLastMessageAsync(Guid conversationId, CancellationToken cancellationToken = default)
         {
-            return await _context.Messages.Where(m =>
-            (m.SenderId == user1Id && m.ReceiverId == user2Id) || (m.SenderId == user2Id && m.ReceiverId == user1Id))
-                .OrderBy(m => m.SentAt)
-                .AsNoTracking()
-                .ToListAsync(cancellationToken);
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<Message>> GetMessagesPagedAsync(Guid conversationId, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<Message>> GetRecentMessagesAsync(Guid conversationId, int count, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
     }
 }

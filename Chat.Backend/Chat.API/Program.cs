@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Chat.Application;
+using Chat.API.Services;
 
 
 namespace Chat.API
@@ -26,7 +27,10 @@ namespace Chat.API
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
+            builder.Services.AddOpenApi(options =>
+            {
+                options.AddDocumentTransformer<OpenApiServerTransformer>();
+            });
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -48,6 +52,15 @@ namespace Chat.API
             builder.Services.AddAuthorization();
 
 
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "Chat API", Version = "v1" });
+
+                options.AddServer(new OpenApiServer
+                {
+                    Url = "http://localhost:8080"
+                });
+            });
 
 
             var app = builder.Build();

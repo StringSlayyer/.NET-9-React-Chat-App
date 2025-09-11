@@ -18,15 +18,16 @@ namespace Chat.Application.Services
         }
         public async Task<IEnumerable<MessageDto>> GetMessagesAsync(Guid userId, Guid otherUserId, CancellationToken cancellationToken = default)
         {
-            var messages = await _messageRepository.GetConversationAsync(userId, otherUserId, cancellationToken);
-            return messages.Select(m => new MessageDto
+            throw new Exception("Not implemented yet");
+           // var messages = await _messageRepository.GetConversationAsync(userId, otherUserId, cancellationToken);
+          /*  return messages.Select(m => new MessageDto
             {
                 Id = m.Id,
                 SenderId = m.SenderId,
                 ReceiverId = m.ReceiverId,
                 Content = m.Content,
                 Timestamp = m.SentAt
-            });
+            });*/
 
         }
 
@@ -40,7 +41,7 @@ namespace Chat.Application.Services
             {
                 Id = Guid.NewGuid(),
                 SenderId = model.SenderId,
-                ReceiverId = model.ReceiverId,
+                //ReceiverId = model.ReceiverId,
                 Content = model.Content,
                 SentAt = DateTime.UtcNow
             };

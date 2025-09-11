@@ -28,7 +28,13 @@ namespace Chat.Application.Services
             if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Password is required", nameof(password));
 
             var user = await _userRepository.GetByUsernameAsync(username, cancellationToken);
-            if(user == null || !_passwordHasher.VerifyPassword(user.Password, password))
+            if(user == null)
+            {
+                throw new UnauthorizedAccessException("Invalid username or password");
+            }
+            var verify = _passwordHasher.VerifyPassword(password, user.Password);
+
+            if (!verify)
             {
                 throw new UnauthorizedAccessException("Invalid username or password");
             }

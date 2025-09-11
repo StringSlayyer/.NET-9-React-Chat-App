@@ -15,6 +15,8 @@ namespace Chat.Infrastructure.Data
 
         public DbSet<User> Users => Set<User>();
         public DbSet<Message> Messages => Set<Message>();
+        public DbSet<Conversation> Conversations => Set<Conversation>();
+        public DbSet<ConversationParticipant> ConversationParticipants => Set<ConversationParticipant>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -25,19 +27,19 @@ namespace Chat.Infrastructure.Data
                 .HasIndex(u => u.Email)
                 .IsUnique();
 
+            modelBuilder.Entity<ConversationParticipant>()
+                .HasKey(cp => new { cp.ConversationId, cp.UserId });
+
             modelBuilder.Entity<Message>()
-                .HasOne<User>()
+                .HasOne(m => m.Sender)
                 .WithMany()
                 .HasForeignKey(m => m.SenderId)
                 .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Message>()
-                .HasOne<User>()
-                .WithMany()
-                .HasForeignKey(m => m.ReceiverId)
-                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Message>()
-                .HasIndex(m => new { m.SenderId, m.ReceiverId });
+                .HasOne(m => m.Conversation)
+                .WithMany(c => c.Messages)
+                .HasForeignKey(m => m.ConversationId);
         }
     }
 }

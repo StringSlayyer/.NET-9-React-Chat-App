@@ -17,9 +17,9 @@ namespace Chat.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(string username, string password)
+        public async Task<IActionResult> Login([FromBody] LoginDTO model)
         {
-            var result = await _authService.LoginAsync(username, password);
+            var result = await _authService.LoginAsync(model.Username, model.Password);
             return Ok(result);
         }
 
