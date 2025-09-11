@@ -25,6 +25,7 @@ namespace Chat.Infrastructure
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IMessageRepository, MessageRepository>();
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IConversationRepository, ConversationRepository>();
             return services;
         }
     }

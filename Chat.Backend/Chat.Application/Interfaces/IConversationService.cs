@@ -9,7 +9,7 @@ namespace Chat.Application.Interfaces
 {
     public interface IConversationService
     {
-        Task<Conversation> CreateConversationAsync(IEnumerable<Guid> participantIds, Guid creatorId, string? name = null, CancellationToken cancellationToken = default);
+        Task<Conversation> CreateConversationAsync(IEnumerable<Guid> participantIds, Guid? creatorId, string? name = null, CancellationToken cancellationToken = default);
         Task<IEnumerable<Conversation>> GetUserConversationsAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<IEnumerable<Message>> GetRecentMessagesAsync(Guid conversationId, int count, CancellationToken cancellationToken = default);
         Task<IEnumerable<Message>> GetMessagesPagedAsync(Guid conversationId, int pageNumber, int pageSize, CancellationToken cancellationToken = default);

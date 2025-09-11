@@ -39,6 +39,27 @@ namespace Chat.Infrastructure.Services
             return tokenHandler.WriteToken(token);
         }
 
+        public TokenValidationParameters GetTokenValidationParameters()
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT_SECRET_KEY"]));
+            if(key == null)
+            {
+                throw new Exception("key is not configured.");
+            }
+            return new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = _configuration["JWT_ISSUER"],
+                ValidAudience = _configuration["JWT_AUDIENCE"],
+                IssuerSigningKey = key,
+                ClockSkew = TimeSpan.Zero 
+            };
+
+        }
+
         public Guid GetUserIdFromClaimsPrincipal(ClaimsPrincipal user)
         {
             var userIdClaims = user?.FindFirst("UserId")?.Value;

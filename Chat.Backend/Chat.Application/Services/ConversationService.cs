@@ -18,12 +18,18 @@ namespace Chat.Application.Services
             _messageRepository = messageRepository;
         }
 
-        public Task AddParticipantAsync(Guid conversationId, Guid requestantId, Guid userId, CancellationToken cancellationToken = default)
+        public async Task AddParticipantAsync(Guid conversationId, Guid requestantId, Guid userId, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var admin = await _conversationRepository.GetParticipantInConversation(conversationId, requestantId, cancellationToken);
+            if (admin == null || !admin.IsAdmin)
+                throw new UnauthorizedAccessException("Only admins can add participants.");
+            var existingParticipant = await _conversationRepository.GetParticipantInConversation(conversationId, userId, cancellationToken);
+            if (existingParticipant != null)
+                throw new InvalidOperationException("User is already a participant in the conversation.");
+            await _conversationRepository.AddParticipantAsync(conversationId, userId, cancellationToken);
         }
 
-        public Task<Conversation> CreateConversationAsync(IEnumerable<Guid> participantIds, Guid adminId, string? name = null, CancellationToken cancellationToken = default)
+        public Task<Conversation> CreateConversationAsync(IEnumerable<Guid> participantIds, Guid? adminId, string? name = null, CancellationToken cancellationToken = default)
         {
             if(participantIds == null || !participantIds.Any())
                 throw new ArgumentException("At least one participant is required to create a conversation.", nameof(participantIds));
@@ -69,14 +75,32 @@ namespace Chat.Application.Services
             return _conversationRepository.GetByUserIdAsync(userId, cancellationToken);
         }
 
-        public Task RemoveParticipantAsync(Guid conversationId, Guid requestantId, Guid userId, CancellationToken cancellationToken = default)
+        public async Task RemoveParticipantAsync(Guid conversationId, Guid requestantId, Guid userId, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var admin = await _conversationRepository.GetParticipantInConversation(conversationId, requestantId, cancellationToken);
+            if (admin == null || !admin.IsAdmin)
+                throw new UnauthorizedAccessException("Only admins can remove participants.");
+            var participant = await _conversationRepository.GetParticipantInConversation(conversationId, userId, cancellationToken);
+            if (participant == null)
+                throw new InvalidOperationException("User is not a participant in the conversation.");
+            await _conversationRepository.RemoveParticipantAsync(conversationId, userId, cancellationToken);
         }
 
-        public Task<Message> SendMessageAsync(Guid userId, Guid conversationId, string content, CancellationToken cancellationToken = default)
+        public async Task<Message> SendMessageAsync(Guid userId, Guid conversationId, string content, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var participant = await _conversationRepository.GetParticipantInConversation(conversationId, userId, cancellationToken);
+            if (participant == null)
+                throw new UnauthorizedAccessException("User is not a participant in the conversation.");
+            var message = new Message
+            {
+                Id = Guid.NewGuid(),
+                ConversationId = conversationId,
+                SenderId = userId,
+                Content = content,
+                SentAt = DateTime.UtcNow
+            };
+            await _messageRepository.AddAsync(message, cancellationToken);
+            return message;
         }
     }
 }

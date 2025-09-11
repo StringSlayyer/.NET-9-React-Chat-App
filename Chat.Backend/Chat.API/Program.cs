@@ -60,6 +60,41 @@ namespace Chat.API
                 {
                     Url = "http://localhost:8080"
                 });
+
+                options.AddSecurityDefinition(
+                    "Bearer",
+                    new OpenApiSecurityScheme
+                    {
+                        In = ParameterLocation.Header,
+                        Description = "Please insert JWT token into field",
+                        Name = "Authorization",
+                        Type = SecuritySchemeType.ApiKey,
+                        BearerFormat = "JWT",
+                        Scheme = "Bearer"
+                    });
+
+                options.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+                options.IgnoreObsoleteActions();
+                options.IgnoreObsoleteProperties();
+                options.CustomSchemaIds(type => type.FullName);
+
+                // Add JWT Bearer Requirement to all API Endpoints
+                options.AddSecurityRequirement(
+                    new OpenApiSecurityRequirement
+                    {
+                        {
+                            new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "Bearer",
+                                },
+                            },
+                            new string[] { }
+                        },
+                    }
+                );
             });
 
 
@@ -79,6 +114,7 @@ namespace Chat.API
 
             app.MapControllers();
 
+            app.UseMiddleware<JwtMiddleware>();
             app.Run();
         }
     }

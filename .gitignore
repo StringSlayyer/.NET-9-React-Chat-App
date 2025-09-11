@@ -82,3 +82,4 @@ appsettings.Development.json
 publish/
 *.pubxml
 *.publishproj
+/Chat.Backend/Chat.API/appsettings.json
