@@ -22,19 +22,34 @@ namespace Chat.Infrastructure.Data.Repositories
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public Task<Message?> GetLastMessageAsync(Guid conversationId, CancellationToken cancellationToken = default)
+        public async Task<Message?> GetLastMessageAsync(Guid conversationId, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            return await _context.Messages
+                .Where(m => m.ConversationId == conversationId)
+                .OrderByDescending(m => m.SentAt)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
-        public Task<IEnumerable<Message>> GetMessagesPagedAsync(Guid conversationId, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Message>> GetMessagesPagedAsync(Guid conversationId, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            return await _context.Messages
+                .Where(m => m.ConversationId == conversationId)
+                .OrderByDescending(m => m.SentAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
         }
 
-        public Task<IEnumerable<Message>> GetRecentMessagesAsync(Guid conversationId, int count, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Message>> GetRecentMessagesAsync(Guid conversationId, int count, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            return await _context.Messages
+                .Where(m => m.ConversationId == conversationId)
+                .OrderByDescending(m => m.SentAt)
+                .Take(count)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
         }
     }
 }
