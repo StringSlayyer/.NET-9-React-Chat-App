@@ -10,24 +10,31 @@ namespace Chat.API
         private readonly RequestDelegate _next;
         private TokenValidationParameters _tokenValidationParameters;
         private readonly ILogger<JwtMiddleware> _logger;
-        private readonly ITokenService _tokenService;
+        private ITokenService _tokenService;
         private readonly IConfiguration _configuration;
 
-        public JwtMiddleware(RequestDelegate next, ITokenService tokenService, ILogger<JwtMiddleware> logger, IConfiguration configuration)
+        public JwtMiddleware(RequestDelegate next, ILogger<JwtMiddleware> logger, IConfiguration configuration)
         {
             _next = next;
-            _tokenService = tokenService;
-            _tokenValidationParameters = _tokenService.GetTokenValidationParameters();
             _logger = logger;
             _configuration = configuration;
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext context, ITokenService tokenService)
         {
+            _tokenService = tokenService;
+            _tokenValidationParameters = _tokenService.GetTokenValidationParameters();
             _logger.LogInformation("JwtMiddleware invoked for path: {Path}", context.Request.Path);
 
             var path = context.Request.Path;
-            if (path.StartsWithSegments("/api/Auth/login") || path.StartsWithSegments("/api/Auth/register"))
+            List<string> paths =
+            [
+                "/api/Auth/login",
+                "/api/Auth/register",
+                "/swagger/index.html",
+                "/openapi/v1.json"
+            ];
+            if (paths.Contains(path.Value) )
             {
                 await _next(context);
                 return;

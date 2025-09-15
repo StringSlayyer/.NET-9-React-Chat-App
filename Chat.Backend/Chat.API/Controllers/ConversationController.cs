@@ -25,7 +25,13 @@ namespace Chat.API.Controllers
             {
                 return Unauthorized("Invalid token or user not found.");
             }
-            var result = await _conversationService.CreateConversationAsync(body.ParticipantIds, body.AdminId, body.Name);
+            var conversation = await _conversationService.CreateConversationAsync(body.ParticipantIds, body.AdminId, body.Name);
+            var result = new ConversationDTO
+            {
+                Id = conversation.Id,
+                Name = conversation.Name,
+                ParticipantIds = conversation.Participants.Select(p => p.UserId)
+            };
             return Ok(result);
         }
 
@@ -37,7 +43,7 @@ namespace Chat.API.Controllers
             {
                 return Unauthorized("Invalid token or user not found.");
             }
-            var result = await _conversationService.SendMessageAsync(body.ConversationId, senderId, body.Content);
+            var result = await _conversationService.SendMessageAsync(senderId, body.ConversationId, body.Content);
             return Ok(result);
         }
 

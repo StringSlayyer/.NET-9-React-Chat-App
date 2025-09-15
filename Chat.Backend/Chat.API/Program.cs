@@ -51,6 +51,8 @@ namespace Chat.API
 
             builder.Services.AddAuthorization();
 
+            builder.Services.AddEndpointsApiExplorer();
+
 
             builder.Services.AddSwaggerGen(options =>
             {
@@ -60,6 +62,7 @@ namespace Chat.API
                 {
                     Url = "http://localhost:8080"
                 });
+
 
                 options.AddSecurityDefinition(
                     "Bearer",
@@ -112,9 +115,9 @@ namespace Chat.API
             app.UseAuthorization();
 
 
+            app.UseMiddleware<JwtMiddleware>();
             app.MapControllers();
 
-            app.UseMiddleware<JwtMiddleware>();
             app.Run();
         }
     }

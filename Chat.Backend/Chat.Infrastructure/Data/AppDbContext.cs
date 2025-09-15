@@ -40,6 +40,14 @@ namespace Chat.Infrastructure.Data
                 .HasOne(m => m.Conversation)
                 .WithMany(c => c.Messages)
                 .HasForeignKey(m => m.ConversationId);
+
+            modelBuilder.Entity<Message>()
+                .HasIndex(m => new { m.ConversationId, m.SentAt });
+
+            modelBuilder.Entity<ConversationParticipant>()
+                .HasIndex(cp => cp.UserId);
         }
+
+        
     }
 }
