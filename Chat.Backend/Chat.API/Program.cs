@@ -53,6 +53,14 @@ namespace Chat.API
 
             builder.Services.AddEndpointsApiExplorer();
 
+            builder.Services.AddCors(opt =>
+                opt.AddPolicy("frontend",
+                    builder =>
+                    {
+                        builder.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod();
+                    }
+                )
+            );
 
             builder.Services.AddSwaggerGen(options =>
             {
@@ -110,6 +118,7 @@ namespace Chat.API
                 options.SwaggerEndpoint("/openapi/v1.json", "v1");
             });
 
+            app.UseCors("frontend");
 
             app.MapOpenApi();
             app.UseAuthorization();
