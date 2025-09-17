@@ -9,6 +9,7 @@ namespace Chat.API.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+
         public UserController(IUserService userService)
         {
             _userService = userService;
@@ -29,5 +30,6 @@ namespace Chat.API.Controllers
             return Ok(user);
         }
 
+       
     }
 }

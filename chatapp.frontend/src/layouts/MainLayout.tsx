@@ -14,7 +14,7 @@ const MainLayout = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-800 p-4 text-center text-sm">
+      <footer className="bg-gray-800 h-[4vh] text-center text-sm">
         © 2025 ChatApp
       </footer>
     </div>

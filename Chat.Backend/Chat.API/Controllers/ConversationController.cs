@@ -30,7 +30,12 @@ namespace Chat.API.Controllers
             {
                 Id = conversation.Id,
                 Name = conversation.Name,
-                ParticipantIds = conversation.Participants.Select(p => p.UserId)
+                Participants = conversation.Participants.Select(p => new ConversationParticipantDTO
+                {
+                    FirstName = p.User.FirstName,
+                    LastName = p.User.LastName,
+                    Id = p.User.Id
+                }).ToList()
             };
             return Ok(result);
         }
@@ -57,6 +62,19 @@ namespace Chat.API.Controllers
             }
             var result = await _conversationService.GetMessagesPagedAsync(body.ConversationId, body.PageNumber, body.PageSize);
             return Ok(result);
+        }
+
+        [HttpGet("getUserConversations")]
+        public async Task<IActionResult> GetUserConversations()
+        {
+            var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("Invalid token or user not found.");
+            }
+            var conversations = await _conversationService.GetUserConversationsAsync(userId);
+            
+            return Ok(conversations);
         }
 
 

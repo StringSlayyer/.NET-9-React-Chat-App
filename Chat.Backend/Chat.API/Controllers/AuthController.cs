@@ -2,6 +2,7 @@
 using Chat.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Xml.Linq;
 
 namespace Chat.API.Controllers
 {
@@ -10,10 +11,12 @@ namespace Chat.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly ITokenService _tokenService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, ITokenService tokenService)
         {
             _authService = authService;
+            _tokenService = tokenService;
         }
 
         [HttpPost("login")]
@@ -28,6 +31,13 @@ namespace Chat.API.Controllers
         {
             var result = await _authService.RegisterAsync(model);
             return Ok(result);
+        }
+
+        [HttpGet("getUserId")]
+        public async Task<IActionResult> GetUserIdFromToken()
+        {
+            var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
+            return Ok(new {UserId = userId });
         }
     }
 }

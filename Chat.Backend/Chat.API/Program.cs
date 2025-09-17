@@ -8,6 +8,7 @@ using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Chat.Application;
 using Chat.API.Services;
+using Chat.API.Hubs;
 
 
 namespace Chat.API
@@ -19,12 +20,12 @@ namespace Chat.API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
+            builder.Services.AddSignalR();
             Env.Load();
             builder.Configuration.AddEnvironmentVariables();
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddApplication();
-
+            builder.Services.AddScoped<ChatHub>();
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi(options =>
@@ -126,6 +127,7 @@ namespace Chat.API
 
             app.UseMiddleware<JwtMiddleware>();
             app.MapControllers();
+            app.MapHub<ChatHub>("/chat").RequireAuthorization();
 
             app.Run();
         }

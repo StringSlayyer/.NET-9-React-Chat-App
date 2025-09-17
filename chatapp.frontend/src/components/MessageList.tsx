@@ -3,9 +3,11 @@ import type { Message } from "../api/messageApi";
 const MessageList = ({
   messages,
   loading,
+  loggedUserId,
 }: {
   messages: Message[];
   loading: boolean;
+  loggedUserId: string;
 }) => {
   if (loading) {
     return <div>Loading messages...</div>;
@@ -15,9 +17,11 @@ const MessageList = ({
     <div className="space-y-2">
       {messages.map((msg) => (
         <div
-          key={msg.uid}
+          key={msg.id}
           className={`p-2 rounded max-w-xs ${
-            msg.senderId === "Já" ? "bg-blue-500 ml-auto" : "bg-gray-600"
+            msg.senderId == loggedUserId
+              ? "bg-blue-500 mr-auto ml-auto"
+              : "bg-gray-600"
           }`}
         >
           <p className="text-sm">{msg.content}</p>

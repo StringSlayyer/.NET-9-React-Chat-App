@@ -1,5 +1,8 @@
-﻿using Chat.Application.Interfaces;
+﻿
+using Chat.Application.DTOs;
+using Chat.Application.Interfaces;
 using Chat.Domain.Entities;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +32,7 @@ namespace Chat.Application.Services
             await _conversationRepository.AddParticipantAsync(conversationId, userId, cancellationToken);
         }
 
-        public Task<Conversation> CreateConversationAsync(IEnumerable<Guid> participantIds, Guid? adminId, string? name = null, CancellationToken cancellationToken = default)
+        public async Task<Conversation> CreateConversationAsync(IEnumerable<Guid> participantIds, Guid? adminId, string? name = null, CancellationToken cancellationToken = default)
         {
             if(participantIds == null || !participantIds.Any())
                 throw new ArgumentException("At least one participant is required to create a conversation.", nameof(participantIds));
@@ -44,11 +47,11 @@ namespace Chat.Application.Services
                 ConversationId = conversation.Id,
                 IsAdmin = id == adminId
             }).ToList();
-            return _conversationRepository.CreateAsync(conversation, cancellationToken);
+            return await _conversationRepository.CreateAsync(conversation, cancellationToken);
 
         }
 
-        public Task<IEnumerable<Message>> GetMessagesPagedAsync(Guid conversationId, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<MessagesDTO>> GetMessagesPagedAsync(Guid conversationId, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
         {
             if(conversationId == Guid.Empty)
                 throw new ArgumentException("Conversation ID cannot be empty.", nameof(conversationId));
@@ -56,23 +59,52 @@ namespace Chat.Application.Services
                 throw new ArgumentOutOfRangeException(nameof(pageNumber), "Page number must be greater than zero.");
             if (pageSize <= 0)
                 throw new ArgumentOutOfRangeException(nameof(pageSize), "Page size must be greater than zero.");
-            return _messageRepository.GetMessagesPagedAsync(conversationId, pageNumber, pageSize, cancellationToken);
+            var messages = await _messageRepository.GetMessagesPagedAsync(conversationId, pageNumber, pageSize, cancellationToken);
+            var result = messages.Select(m => new MessagesDTO
+            {
+                Id = m.Id,
+                SenderId = m.SenderId,
+                ConversationId = m.ConversationId,
+                Content = m.Content,
+                SentAt = m.SentAt,
+                IsRead = m.IsRead
+            });
+            return result;
         }
 
-        public Task<IEnumerable<Message>> GetRecentMessagesAsync(Guid conversationId, int count, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Message>> GetRecentMessagesAsync(Guid conversationId, int count, CancellationToken cancellationToken = default)
         {
             if (conversationId == Guid.Empty)
                 throw new ArgumentException("Conversation ID cannot be empty.", nameof(conversationId));
             if (count <= 0)
                 throw new ArgumentOutOfRangeException(nameof(count), "Count must be greater than zero.");
-            return _messageRepository.GetRecentMessagesAsync(conversationId, count, cancellationToken);
+            return await _messageRepository.GetRecentMessagesAsync(conversationId, count, cancellationToken);
         }
 
-        public Task<IEnumerable<Conversation>> GetUserConversationsAsync(Guid userId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<ConversationDTO>> GetUserConversationsAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             if (userId == Guid.Empty)
                 throw new ArgumentException("User ID cannot be empty.", nameof(userId));
-            return _conversationRepository.GetByUserIdAsync(userId, cancellationToken);
+            var conversations = await _conversationRepository.GetByUserIdAsync(userId, cancellationToken);
+            var result = new List<ConversationDTO>();
+            foreach (var convo in conversations)
+            {
+                var convoDto = new ConversationDTO
+                {
+                    Id = convo.Id,
+                    Name = convo.Name,
+                    Participants = convo.Participants.Select(p => new ConversationParticipantDTO
+                    {
+                        FirstName = p.User.FirstName,
+                        LastName = p.User.LastName,
+                        Id = p.User.Id
+                    }).ToList()
+                };
+                result.Add(convoDto);
+            }
+
+
+            return result;
         }
 
         public async Task RemoveParticipantAsync(Guid conversationId, Guid requestantId, Guid userId, CancellationToken cancellationToken = default)

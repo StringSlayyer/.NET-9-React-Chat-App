@@ -35,6 +35,7 @@ namespace Chat.Infrastructure.Data.Repositories
         {
             return await _context.Messages
                 .Where(m => m.ConversationId == conversationId)
+                .Include(m => m.Sender)
                 .OrderByDescending(m => m.SentAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)

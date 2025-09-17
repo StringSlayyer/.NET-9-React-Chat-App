@@ -43,6 +43,8 @@ namespace Chat.Infrastructure.Data.Repositories
         public async Task<IEnumerable<Conversation>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             return await _context.Conversations.AsNoTracking()
+                .Include(c=> c.Participants)
+                    .ThenInclude(cp => cp.User)
                 .Where(c => c.Participants.Any(p => p.UserId == userId))
                 .ToListAsync(cancellationToken);
         }

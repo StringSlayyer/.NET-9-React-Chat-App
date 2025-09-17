@@ -10,6 +10,7 @@ namespace Chat.Application.DTOs
     {
         public Guid Id { get; set; }
         public string? Name { get; set; }
-        public IEnumerable<Guid> ParticipantIds { get; set; } = Enumerable.Empty<Guid>();
+        public bool? IsGroup { get; set; }
+        public List<ConversationParticipantDTO> Participants { get; set; } = new List<ConversationParticipantDTO>();
     }
 }

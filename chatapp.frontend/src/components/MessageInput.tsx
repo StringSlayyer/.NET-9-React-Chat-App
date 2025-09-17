@@ -1,11 +1,16 @@
 import { useState } from "react";
 
-const MessageInput = () => {
+interface MessageInputProps {
+  onSend: (message: string) => void;
+}
+
+const MessageInput = ({ onSend }: MessageInputProps) => {
   const [message, setMessage] = useState("");
 
   const handleSend = () => {
     if (!message.trim()) return;
     console.log("Odesílám zprávu:", message);
+    onSend(message);
     setMessage("");
   };
 
@@ -13,10 +18,11 @@ const MessageInput = () => {
     <div className="flex space-x-2">
       <input
         type="text"
-        className="flex-1 p-2 rounded bg-gray-700 text-white"
+        className="flex-1 p-2 rounded bg-white text-gray-700"
         placeholder="Napiš zprávu..."
         value={message}
         onChange={(e) => setMessage(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && handleSend()}
       />
       <button
         onClick={handleSend}

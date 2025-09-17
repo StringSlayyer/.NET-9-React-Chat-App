@@ -15,6 +15,10 @@ export interface RegistrationDTO {
   password: string;
 }
 
+export interface UserIdResponse {
+  userId: string;
+}
+
 export const login = async (data: LoginDTO) => {
   const response = await axios.post(`${API_URL}/login`, data);
   return response.data;
@@ -23,4 +27,13 @@ export const login = async (data: LoginDTO) => {
 export const register = async (data: RegistrationDTO) => {
   const response = await axios.post(`${API_URL}/register`, data);
   return response.data;
+};
+
+export const getUserId = async (token: string): Promise<UserIdResponse> => {
+  const response = await axios.get(`${API_URL}/getUserId`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data as UserIdResponse;
 };

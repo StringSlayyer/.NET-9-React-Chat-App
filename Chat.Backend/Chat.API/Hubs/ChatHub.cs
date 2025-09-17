@@ -1,12 +1,28 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Chat.Application.Interfaces;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Chat.API.Hubs
 {
     public class ChatHub : Hub
     {
-        public async Task SendMessage(Guid conversationId, Guid senderId, string message)
+        private readonly IConversationService _conversationService;
+        public ChatHub(IConversationService conversationService)
         {
-            await Clients.Group(conversationId.ToString()).SendAsync("ReceiveMessage", senderId, message, DateTime.UtcNow);
+            _conversationService = conversationService;
+        }
+        public async Task SendMessage(Guid conversationId, string message)
+        {
+            var userId = Context.User?.FindFirst("UserId")?.Value;
+            var senderId = Guid.Parse(userId ?? throw new Exception("User ID not found in claims."));
+            var sentMessage = await _conversationService.SendMessageAsync(senderId, conversationId, message);
+            await Clients.Group(conversationId.ToString()).SendAsync("ReceiveMessage", new
+            {
+                sentMessage.Id,
+                sentMessage.SenderId,
+                sentMessage.Content,
+                sentMessage.SentAt,
+                sentMessage.ConversationId
+            });
         }
 
         public async Task JoinConversation(Guid conversationId)

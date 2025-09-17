@@ -13,7 +13,7 @@ export interface SendMessageDTO {
 }
 
 export interface Message {
-  uid: string;
+  id: string;
   conversationId: string;
   senderId: string;
   content: string;
@@ -26,7 +26,7 @@ export const getMessagesPaged = async (
   token: string
 ): Promise<Message[]> => {
   const response = await axios.get(
-    `${API_URL}/Messages/${data.conversationId}?pageNumber=${data.pageNumber}&pageSize=${data.pageSize}`,
+    `${API_URL}/Conversation/getMessagesPaged?conversationId=${data.conversationId}&pageNumber=${data.pageNumber}&pageSize=${data.pageSize}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
