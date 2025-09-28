@@ -40,8 +40,8 @@ const ChatPage = () => {
     fetchConversations();
   }, [token]);
   return (
-    <div className="h-full w-screen flex justify-around">
-      <div className="w-1/4 bg-gray-800 text-white p-4">
+    <div className="h-full w-screen flex">
+      <div className="w-1/4 bg-gray-800 text-white py-1">
         {loading ? <p>Načítání konverzací...</p> : null}
         <Sidebar
           conversations={conversations}
@@ -50,7 +50,7 @@ const ChatPage = () => {
           loggedUserId={loggedUserId}
         />
       </div>
-      <div className="flex-1 bg-gray-800">
+      <div className="flex-1 py-1 bg-gray-800">
         <ChatWindow
           conversation={selectedConversation}
           loggedUserId={loggedUserId}

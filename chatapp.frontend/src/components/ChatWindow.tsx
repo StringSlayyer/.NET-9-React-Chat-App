@@ -14,7 +14,6 @@ const ChatWindow = ({ conversation, loggedUserId }: ChatWindowProps) => {
   const { token } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-
   useEffect(() => {
     const fetchMessage = async (conversationId: string) => {
       if (!token) return;
@@ -44,6 +43,11 @@ const ChatWindow = ({ conversation, loggedUserId }: ChatWindowProps) => {
 
     const init = async () => {
       const conn = await startConnection(token);
+      console.log("SignalR connection started in ChatWindow:", conn);
+
+      if (conversation) {
+        await conn.invoke("JoinConversation", conversation.id);
+      }
 
       conn?.on("ReceiveMessage", (msg: Message) => {
         if (msg.conversationId === conversation?.id) {
@@ -55,9 +59,12 @@ const ChatWindow = ({ conversation, loggedUserId }: ChatWindowProps) => {
 
     return () => {
       const conn = getConnection();
+      if (conn && conversation) {
+        conn.invoke("LeaveConversation", conversation.id);
+      }
       conn?.off("ReceiveMessage");
     };
-  }, [conversation?.id, token]);
+  }, [conversation, token]);
 
   const handleSendMessage = async (content: string) => {
     const conn = getConnection();
@@ -65,10 +72,7 @@ const ChatWindow = ({ conversation, loggedUserId }: ChatWindowProps) => {
     if (conn && conversation) {
       try {
         console.log("Odesílám zprávu přes SignalR:", content);
-        await conn.invoke("SendMessage", {
-          conversationId: conversation.id,
-          content,
-        });
+        await conn.invoke("SendMessage", conversation.id, content);
       } catch (error) {
         console.error("Failed to send message", error);
       }
@@ -77,22 +81,22 @@ const ChatWindow = ({ conversation, loggedUserId }: ChatWindowProps) => {
 
   if (!conversation) {
     return (
-      <div className="h-full flex items-center justify-center">
+      <div className="h-screen flex items-center justify-center">
         Vyber konverzaci
       </div>
     );
   }
 
   return (
-    <div className="min-h-[90vh] w-full flex flex-col justify-around">
-      <div className="flex-1 h-4/6 overflow-y-auto p-4">
+    <div className="h-full flex flex-col">
+      <div className="flex-1 min-h-0">
         <MessageList
           messages={messages}
           loading={loading}
           loggedUserId={loggedUserId}
         />
       </div>
-      <div className=" p-4 h-2/6 border-t border-gray-700">
+      <div className=" p-4  border-t border-gray-700">
         <MessageInput onSend={handleSendMessage} />
       </div>
     </div>

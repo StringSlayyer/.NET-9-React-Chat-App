@@ -25,7 +25,6 @@ namespace Chat.API
             builder.Configuration.AddEnvironmentVariables();
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddApplication();
-            builder.Services.AddScoped<ChatHub>();
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi(options =>
@@ -35,7 +34,7 @@ namespace Chat.API
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
-                { 
+                {
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
@@ -46,7 +45,24 @@ namespace Chat.API
                         ValidAudience = builder.Configuration["JWT_AUDIENCE"],
                         IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT_SECRET_KEY"]))
                     };
-                }
+
+
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+                            var path = context.HttpContext.Request.Path;
+
+                            if (!string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments("/chat", StringComparison.OrdinalIgnoreCase))
+                            {
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
+                 }
             );
 
 
@@ -58,7 +74,7 @@ namespace Chat.API
                 opt.AddPolicy("frontend",
                     builder =>
                     {
-                        builder.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod();
+                        builder.WithOrigins("http://localhost:5173", "https://localhost:5173").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
                     }
                 )
             );
@@ -119,15 +135,18 @@ namespace Chat.API
                 options.SwaggerEndpoint("/openapi/v1.json", "v1");
             });
 
+            app.UseRouting();
+
             app.UseCors("frontend");
 
             app.MapOpenApi();
+            app.UseAuthentication();
             app.UseAuthorization();
 
 
             app.UseMiddleware<JwtMiddleware>();
             app.MapControllers();
-            app.MapHub<ChatHub>("/chat").RequireAuthorization();
+            app.MapHub<ChatHub>("/chat");
 
             app.Run();
         }

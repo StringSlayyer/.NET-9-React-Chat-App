@@ -2,14 +2,14 @@ import { Outlet } from "react-router-dom";
 
 const MainLayout = () => {
   return (
-    <div className="flex flex-col max-h-screen bg-gray-900 text-white">
+    <div className="flex flex-col h-screen bg-gray-900 text-white">
       {/* Header */}
       <header className="bg-primary p-4 flex items-center justify-center shadow-md">
         <h1 className="text-xl font-bold">ChatApp</h1>
       </header>
 
       {/* Main content (vyplní zbytek výšky) */}
-      <main className="flex-1 flex overflow-hidden">
+      <main className="flex-1 min-h-0 flex">
         <Outlet />
       </main>
 
