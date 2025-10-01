@@ -18,8 +18,8 @@ const MessageInput = ({ onSend }: MessageInputProps) => {
     <div className="flex space-x-2">
       <input
         type="text"
-        className="flex-1 p-2 rounded bg-white text-gray-700"
-        placeholder="Napiš zprávu..."
+        className="flex-1 p-2 rounded text-gray-200 bg-gray-700"
+        placeholder="Type a message..."
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSend()}

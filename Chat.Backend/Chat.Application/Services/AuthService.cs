@@ -15,11 +15,13 @@ namespace Chat.Application.Services
         private readonly IPasswordHasher _passwordHasher;
         private readonly IUserRepository _userRepository;
         private readonly ITokenService _tokenService;
-        public AuthService(IPasswordHasher passwordHasher, IUserRepository userRepository, ITokenService tokenService)
+        private readonly IFileStorageService _fileStorageService;
+        public AuthService(IPasswordHasher passwordHasher, IUserRepository userRepository, ITokenService tokenService, IFileStorageService fileStorageService)
         {
             _passwordHasher = passwordHasher;
             _userRepository = userRepository;
             _tokenService = tokenService;
+            _fileStorageService = fileStorageService;
         }
 
         public async Task<TokenResponse> LoginAsync(string username, string password, CancellationToken cancellationToken = default)
@@ -64,6 +66,15 @@ namespace Chat.Application.Services
             };
 
             cancellationToken.ThrowIfCancellationRequested();
+
+            if(model.ProfilePicture != null && model.ProfilePicture.Length > 0)
+            {
+                var profilePicturePath = await _fileStorageService.UploadFile(user.Id, model.ProfilePicture);
+                if (profilePicturePath.IsSuccess)
+                {
+                    user.ProfilePicturePath = profilePicturePath.Data;
+                }
+            }
 
             await _userRepository.AddAsync(user, cancellationToken);
 

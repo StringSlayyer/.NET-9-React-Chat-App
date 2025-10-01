@@ -12,7 +12,7 @@ const Sidebar = ({
 }) => {
   const getConversationName = (conversation: ConversationDTO) => {
     if (conversation.isGroup) {
-      return conversation.name || "Bez názvu";
+      return conversation.name || "Unnamed Group";
     }
     console.log("Participants:", conversation.participants);
     console.log("Logged User ID:", loggedUserId);
@@ -22,16 +22,16 @@ const Sidebar = ({
     console.log("Other Participant:", otherParticipant);
     return otherParticipant
       ? `${otherParticipant.firstName} ${otherParticipant.lastName}`
-      : "Bez názvu";
+      : "Unknown User";
   };
   if (loading) {
-    return <div>Načítání konverzací...</div>;
+    return <div>Loading conversations...</div>;
   }
   return (
     <div className="h-full p-4 overflow-y-auto bg-gray-950">
-      <h2 className="text-lg font-bold mb-4">Konverzace</h2>
+      <h2 className="text-lg font-bold mb-4">Chats</h2>
       {conversations.length === 0 ? (
-        <p className="text-gray-400">Žádné konverzace k zobrazení.</p>
+        <p className="text-gray-400">No chats to display.</p>
       ) : (
         conversations.map((conversation) => (
           <div

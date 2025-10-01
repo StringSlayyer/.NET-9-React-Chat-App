@@ -19,5 +19,6 @@ namespace Chat.Domain.Entities
         public string? Password { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTimeOffset? LastLoggedInDate { get; set; }
+        public string? ProfilePicturePath { get; set; }
     }
 }

@@ -13,6 +13,8 @@ services:
       - "8080:8080"
     networks:
       - postgres-network
+    volumes:
+      - chatapp_uploads:/app/uploads
 
   database:
     image: postgres:latest
@@ -46,6 +48,7 @@ services:
 volumes:
     chatapp_data:
     pgadmin_data:
+    chatapp_uploads:
 
 networks:
    postgres-network:

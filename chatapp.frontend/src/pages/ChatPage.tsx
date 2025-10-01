@@ -42,7 +42,7 @@ const ChatPage = () => {
   return (
     <div className="h-full w-screen flex">
       <div className="w-1/4 bg-gray-800 text-white py-1">
-        {loading ? <p>Načítání konverzací...</p> : null}
+        {loading ? <p>Loading chats...</p> : null}
         <Sidebar
           conversations={conversations}
           loading={loading}
