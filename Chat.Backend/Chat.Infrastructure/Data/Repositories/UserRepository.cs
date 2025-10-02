@@ -44,5 +44,11 @@ namespace Chat.Infrastructure.Data.Repositories
             var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
             return user;
         }
+
+        public Task UpdateUser(User user, CancellationToken cancellationToken = default)
+        {
+            _context.Users.Update(user);
+            return _context.SaveChangesAsync(cancellationToken);
+        }
     }
 }

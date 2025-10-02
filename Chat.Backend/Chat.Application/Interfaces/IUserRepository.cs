@@ -14,5 +14,6 @@ namespace Chat.Application.Interfaces
         Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
         Task AddAsync(User user, CancellationToken cancellationToken = default);
         Task<IEnumerable<User>> GetAllUsersAsync(CancellationToken cancellationToken = default);
+        Task UpdateUser(User user, CancellationToken cancellationToken = default);
     }
 }

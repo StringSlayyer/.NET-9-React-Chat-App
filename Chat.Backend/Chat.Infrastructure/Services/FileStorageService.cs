@@ -23,7 +23,7 @@ namespace Chat.Infrastructure.Services
             _fileStoragePath = configuration["FILE_STORAGE_PATH"];
             _logger = logger;
         }
-        public async Task<Result<string>> UploadFile(int userId, IFormFile file)
+        public async Task<Result<string>> UploadFile(Guid id, IFormFile file)
         {
             try
             {
@@ -40,7 +40,7 @@ namespace Chat.Infrastructure.Services
                 }
 
                 var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
-                var savedFilePath = await SaveFileAsync(userId, fileName, file.OpenReadStream());
+                var savedFilePath = await SaveFileAsync(id, fileName, file.OpenReadStream());
 
 
                 return Result<string>.Success(savedFilePath);
@@ -50,7 +50,7 @@ namespace Chat.Infrastructure.Services
                 return Result<string>.Failure($"Exception: {ex.Message}");
             }
         }
-        public async Task<string> SaveFileAsync(int userId, string fileName, Stream fileStream)
+        public async Task<string> SaveFileAsync(Guid userId, string fileName, Stream fileStream)
         {
             _fileStoragePath.Trim();
             Directory.CreateDirectory(_fileStoragePath);

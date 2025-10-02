@@ -1,4 +1,5 @@
-﻿using Chat.Application.Interfaces;
+﻿using Chat.Application.DTOs;
+using Chat.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,10 +10,12 @@ namespace Chat.API.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly ITokenService _tokenService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, ITokenService tokenService)
         {
             _userService = userService;
+            _tokenService = tokenService;
         }
 
         [HttpGet]
@@ -30,6 +33,24 @@ namespace Chat.API.Controllers
             return Ok(user);
         }
 
-       
+        [HttpPost("uploadProfilePicture")]
+        public async Task<IActionResult> UploadProfilePicture([FromForm] UploadPictureDTO model)
+        {
+            var user = _tokenService.GetUserIdFromClaimsPrincipal(User);
+            if (user == null) return Unauthorized();
+            await _userService.UploadProfilePictureAsync(user, model.ProfilePicture);
+            return Ok();
+        }
+
+        [HttpGet("getProfilePicture")]
+        public async Task<IActionResult> GetProfilePicture()
+        {
+            var user = _tokenService.GetUserIdFromClaimsPrincipal(User);
+            if(user == null) return Unauthorized();
+            var picture = await _userService.GetProfilePictureAsync(user);
+            if (!picture.IsSuccess) return NotFound(picture.ErrorMessage);
+            return File(picture.Data.FileStream, picture.Data.ContentType);
+
+        }
     }
 }
