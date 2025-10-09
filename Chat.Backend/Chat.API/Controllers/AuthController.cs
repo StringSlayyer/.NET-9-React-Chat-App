@@ -27,7 +27,7 @@ namespace Chat.API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegistrationDTO model)
+        public async Task<IActionResult> Register([FromForm] RegistrationDTO model)
         {
             var result = await _authService.RegisterAsync(model);
             return Ok(result);

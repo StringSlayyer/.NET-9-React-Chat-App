@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { login } from "../api/authApi";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const LoginPage = () => {
   const { login: saveToken } = useAuth();
@@ -29,8 +29,8 @@ const LoginPage = () => {
   };
   return (
     <div className="flex flex-col items-center justify-center w-screen h-screen">
-      <div className="flex flex-col items-center bg-gray-800 p-12 w-1/3 justify-center rounded">
-        <div className="shadow-md w-full max-w-md">
+      <div className="flex flex-col items-center bg-gray-800 p-12 mb-32 w-1/3 justify-center rounded">
+        <div className="w-full max-w-md">
           <h2 className="text-2xl font-bold mb-8">Přihlášení</h2>
           <form className="mb-6" onSubmit={handleSubmit}>
             <div>
@@ -58,6 +58,12 @@ const LoginPage = () => {
               Přihlásit se
             </button>
           </form>
+          <p>
+            Nemáte účet?{" "}
+            <Link to="/register" className="text-primary underline">
+              Zaregistrujte se
+            </Link>
+          </p>
         </div>
       </div>
     </div>

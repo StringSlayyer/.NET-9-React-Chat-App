@@ -8,6 +8,7 @@ export interface UserDTO {
   firstName: string;
   lastName: string;
   email: string;
+  profilePictureUrl?: string;
 }
 
 export const getUser = async (token: string): Promise<UserDTO> => {

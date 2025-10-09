@@ -68,7 +68,8 @@ namespace Chat.Application.Services
                 Content = m.Content,
                 SentAt = m.SentAt,
                 IsRead = m.IsRead
-            });
+            }).OrderByDescending(m => m.SentAt);
+
             return result;
         }
 
@@ -102,6 +103,8 @@ namespace Chat.Application.Services
                 };
                 result.Add(convoDto);
             }
+
+            
 
 
             return result;

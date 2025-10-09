@@ -13,6 +13,7 @@ export interface RegistrationDTO {
   lastName: string;
   email: string;
   password: string;
+  profilePicture?: File;
 }
 
 export interface UserIdResponse {
@@ -24,8 +25,12 @@ export const login = async (data: LoginDTO) => {
   return response.data;
 };
 
-export const register = async (data: RegistrationDTO) => {
-  const response = await axios.post(`${API_URL}/register`, data);
+export const register = async (formData: FormData) => {
+  const response = await axios.post(`${API_URL}/register`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data;
 };
 

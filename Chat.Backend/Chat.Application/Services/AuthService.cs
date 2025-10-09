@@ -70,10 +70,7 @@ namespace Chat.Application.Services
             if(model.ProfilePicture != null && model.ProfilePicture.Length > 0)
             {
                 var profilePicturePath = await _fileStorageService.UploadFile(user.Id, model.ProfilePicture);
-                if (profilePicturePath.IsSuccess)
-                {
-                    user.ProfilePicturePath = profilePicturePath.Data;
-                }
+                user.ProfilePicturePath = profilePicturePath.IsSuccess ? profilePicturePath.Data : "user.png";
             }
 
             await _userRepository.AddAsync(user, cancellationToken);

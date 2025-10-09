@@ -9,7 +9,7 @@ const MainLayout = () => {
       </header>
 
       {/* Main content (vyplní zbytek výšky) */}
-      <main className="flex-1 min-h-0 flex">
+      <main className="flex-1 min-h-0 flex  justify-center">
         <Outlet />
       </main>
 
