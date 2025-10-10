@@ -1,18 +1,24 @@
 import { type ConversationDTO } from "../api/conversationApi";
+import UserAvatar from "./UserAvatar";
 const Sidebar = ({
   conversations,
   loading,
   loggedUserId,
+  token,
   onSelectConversation,
 }: {
   conversations: ConversationDTO[];
   loading: boolean;
   loggedUserId: string;
+  token: string;
   onSelectConversation: (conversation: ConversationDTO) => void;
 }) => {
-  const getConversationName = (conversation: ConversationDTO) => {
+  const getConversationDisplay = (conversation: ConversationDTO) => {
     if (conversation.isGroup) {
-      return conversation.name || "Unnamed Group";
+      return {
+        name: conversation.name || "Unnamed Group",
+        avatarUrl: conversation.groupAvatarId || "",
+      };
     }
     console.log("Participants:", conversation.participants);
     console.log("Logged User ID:", loggedUserId);
@@ -20,9 +26,12 @@ const Sidebar = ({
       (p) => p.id !== loggedUserId
     );
     console.log("Other Participant:", otherParticipant);
-    return otherParticipant
-      ? `${otherParticipant.firstName} ${otherParticipant.lastName}`
-      : "Unknown User";
+    return {
+      name: otherParticipant
+        ? `${otherParticipant.firstName} ${otherParticipant.lastName}`
+        : "Unknown User",
+      avatarUrl: otherParticipant?.id,
+    };
   };
   if (loading) {
     return <div>Loading conversations...</div>;
@@ -33,17 +42,19 @@ const Sidebar = ({
       {conversations.length === 0 ? (
         <p className="text-gray-400">No chats to display.</p>
       ) : (
-        conversations.map((conversation) => (
-          <div
-            key={conversation.id}
-            className="p-2 hover:bg-gray-700 rounded cursor-pointer"
-            onClick={() => onSelectConversation(conversation)}
-          >
-            <span className="text-gray-400 hover:text-white">
-              {getConversationName(conversation)}
-            </span>
-          </div>
-        ))
+        conversations.map((conversation) => {
+          const { name, avatarUrl } = getConversationDisplay(conversation);
+          return (
+            <div
+              key={conversation.id}
+              className="p-2 hover:bg-gray-700 rounded cursor-pointer"
+              onClick={() => onSelectConversation(conversation)}
+            >
+              <UserAvatar userId={avatarUrl} token={token} size={40} />
+              <span className="text-gray-400 hover:text-white">{name}</span>
+            </div>
+          );
+        })
       )}
     </div>
   );

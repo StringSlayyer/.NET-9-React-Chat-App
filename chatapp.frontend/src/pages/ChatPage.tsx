@@ -46,6 +46,7 @@ const ChatPage = () => {
         <Sidebar
           conversations={conversations}
           loading={loading}
+          token={token!}
           onSelectConversation={setSelectedConversation}
           loggedUserId={loggedUserId}
         />

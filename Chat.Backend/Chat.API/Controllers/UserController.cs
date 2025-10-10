@@ -43,14 +43,16 @@ namespace Chat.API.Controllers
         }
 
         [HttpGet("getProfilePicture")]
-        public async Task<IActionResult> GetProfilePicture()
+        public async Task<IActionResult> GetProfilePicture(Guid userId)
         {
             var user = _tokenService.GetUserIdFromClaimsPrincipal(User);
-            if(user == null) return Unauthorized();
-            var picture = await _userService.GetProfilePictureAsync(user);
+            var pictureId = userId != Guid.Empty ? userId : user;
+            var picture = await _userService.GetProfilePictureAsync(pictureId);
             if (!picture.IsSuccess) return NotFound(picture.ErrorMessage);
             return File(picture.Data.FileStream, picture.Data.ContentType);
 
         }
+
+        
     }
 }

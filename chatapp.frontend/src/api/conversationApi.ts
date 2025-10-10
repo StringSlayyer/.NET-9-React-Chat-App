@@ -11,6 +11,8 @@ export interface ConversationDTO {
   name?: string;
   participants: Participant[];
   isGroup: boolean;
+  groupAvatarId?: string;
+  avatarId?: string;
 }
 
 export interface GetConversationsDTO {

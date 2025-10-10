@@ -19,3 +19,20 @@ export const getUser = async (token: string): Promise<UserDTO> => {
   });
   return response.data;
 };
+
+export const getUserAvatar = async (
+  userId: string,
+  token: string
+): Promise<string> => {
+  const response = await axios.get(
+    `${API_URL}/getProfilePicture?userId=${userId}`,
+    {
+      responseType: "blob",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  console.log("Avatar response:", response);
+  return URL.createObjectURL(response.data);
+};
