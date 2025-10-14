@@ -1,4 +1,5 @@
 ﻿using Chat.Application.DTOs;
+using Chat.Application.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Chat.Application.Interfaces
 {
     public interface IAuthService
     {
-        Task<TokenResponse> RegisterAsync(RegistrationDTO model, CancellationToken cancellationToken = default);
-        Task<TokenResponse> LoginAsync(string username, string password, CancellationToken cancellationToken = default);
+        Task<Result<TokenResponse>> RegisterAsync(RegistrationDTO model, CancellationToken cancellationToken = default);
+        Task<Result<TokenResponse>> LoginAsync(string username, string password, CancellationToken cancellationToken = default);
     }
 }

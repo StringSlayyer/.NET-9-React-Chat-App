@@ -16,9 +16,9 @@ const LoginPage = () => {
       console.log("Logging in...");
       const res = await login({ username, password });
       console.log("Login response:", res);
-      if (res.token) {
+      if (res.data.token) {
         console.log("Login successful");
-        saveToken(res.token);
+        saveToken(res.data.token);
         console.log("Redirecting to /chat");
         navigate("/chat");
         console.log("Redirected to /chat");

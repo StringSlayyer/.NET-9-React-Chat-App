@@ -1,5 +1,6 @@
 ﻿using Chat.Application.Interfaces;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Chat.API.Hubs
 {
@@ -35,6 +36,17 @@ namespace Chat.API.Hubs
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, conversationId.ToString());
             await Clients.Caller.SendAsync("LeftConversation", conversationId);
+        }
+
+        public async Task MarkMessageAsRead(Guid conversationId)
+        {
+            var userId = Context.User?.FindFirst("UserId")?.Value;
+            var senderId = Guid.Parse(userId ?? throw new Exception("User ID not found in claims."));
+
+            var mark = await _conversationService.MarkMessagesAsReadAsync(senderId, conversationId);
+            if (mark.IsSuccess)
+                await Clients.Group(conversationId.ToString()).SendAsync("MessagesMarkedAsRead", conversationId, senderId);
+
         }
 
         public override Task OnConnectedAsync()

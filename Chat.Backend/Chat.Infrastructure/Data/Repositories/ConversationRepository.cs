@@ -56,6 +56,17 @@ namespace Chat.Infrastructure.Data.Repositories
                 .FirstOrDefaultAsync(cp => cp.ConversationId == conversationId && cp.UserId == userId, cancellationToken);
         }
 
+        public async Task MarkMessageAsRead(Guid userId, Guid conversationId)
+        {
+            var messages = await _context.Messages.Where(m => m.ConversationId == conversationId && m.SenderId != userId && m.IsRead).ToListAsync();
+            foreach (var message in messages)
+            {
+                message.IsRead = true;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
         public async Task RemoveParticipantAsync(Guid conversationId, Guid userId, CancellationToken cancellationToken = default)
         {
             await _context.ConversationParticipants

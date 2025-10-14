@@ -14,6 +14,7 @@ const ChatWindow = ({ conversation, loggedUserId }: ChatWindowProps) => {
   const { token } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
   useEffect(() => {
     const fetchMessage = async (conversationId: string) => {
       if (!token) return;
@@ -39,14 +40,22 @@ const ChatWindow = ({ conversation, loggedUserId }: ChatWindowProps) => {
   }, [conversation, token]);
 
   useEffect(() => {
+    console.log("Token in ChatWindow useEffect:", token);
     if (!token) return;
 
     const init = async () => {
+      console.log("Starting SignalR connection in ChatWindow");
       const conn = await startConnection(token);
       console.log("SignalR connection started in ChatWindow:", conn);
 
       if (conversation) {
         await conn.invoke("JoinConversation", conversation.id);
+
+        await conn.invoke("MarkMessageAsRead", conversation.id);
+        console.log(
+          "Joined conversation and ran mark as read:",
+          conversation.id
+        );
       }
 
       conn?.on("ReceiveMessage", (msg: Message) => {
@@ -54,6 +63,19 @@ const ChatWindow = ({ conversation, loggedUserId }: ChatWindowProps) => {
           setMessages((prevMessages) => [...prevMessages, msg]);
         }
       });
+
+      conn?.on(
+        "MessagesMarkedAsRead",
+        (data: { conversationId: string; readerId: string }) => {
+          if (data.conversationId === conversation?.id) {
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.senderId === loggedUserId ? { ...msg, isRead: true } : msg
+              )
+            );
+          }
+        }
+      );
     };
     init();
 
@@ -64,7 +86,7 @@ const ChatWindow = ({ conversation, loggedUserId }: ChatWindowProps) => {
       }
       conn?.off("ReceiveMessage");
     };
-  }, [conversation, token]);
+  }, [conversation, token, loggedUserId]);
 
   const handleSendMessage = async (content: string) => {
     const conn = getConnection();

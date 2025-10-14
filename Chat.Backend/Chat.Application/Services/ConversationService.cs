@@ -1,6 +1,7 @@
 ﻿
 using Chat.Application.DTOs;
 using Chat.Application.Interfaces;
+using Chat.Application.Models;
 using Chat.Domain.Entities;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;
@@ -70,7 +71,7 @@ namespace Chat.Application.Services
                 IsRead = m.IsRead
             }).OrderByDescending(m => m.SentAt);
 
-            return result;
+            return result.Reverse();
         }
 
         public async Task<IEnumerable<Message>> GetRecentMessagesAsync(Guid conversationId, int count, CancellationToken cancellationToken = default)
@@ -108,6 +109,16 @@ namespace Chat.Application.Services
 
 
             return result;
+        }
+
+        public async Task<Result> MarkMessagesAsReadAsync(Guid userId, Guid conversationId)
+        {
+            if(userId == Guid.Empty) return Result.Failure("User ID cannot be empty.");
+            if(conversationId == Guid.Empty) return Result.Failure("Conversation ID cannot be empty.");
+
+            await _conversationRepository.MarkMessageAsRead(userId, conversationId);
+            return Result.Success();
+
         }
 
         public async Task RemoveParticipantAsync(Guid conversationId, Guid requestantId, Guid userId, CancellationToken cancellationToken = default)

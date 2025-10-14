@@ -51,6 +51,8 @@ namespace Chat.Application.Services
         public async Task<Result<ReturnFileDTO>> GetProfilePictureAsync(Guid guid)
         {
             var path = await _userRepository.GetByIdAsync(guid);
+            if(path == null || string.IsNullOrWhiteSpace(path.ProfilePicturePath))
+                return new Result<ReturnFileDTO> { IsSuccess = false, ErrorMessage = "Profile picture not found" };
             var picture = await _fileStorageService.ReturnFile(path.ProfilePicturePath);
             return picture;
         }

@@ -1,5 +1,6 @@
 ﻿using Chat.Application.DTOs;
 using Chat.Application.Interfaces;
+using Chat.Application.Models;
 using Chat.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -24,34 +25,28 @@ namespace Chat.Application.Services
             _fileStorageService = fileStorageService;
         }
 
-        public async Task<TokenResponse> LoginAsync(string username, string password, CancellationToken cancellationToken = default)
+        public async Task<Result<TokenResponse>> LoginAsync(string username, string password, CancellationToken cancellationToken = default)
         {
-            if(string.IsNullOrWhiteSpace(username)) throw new ArgumentException("Username is required", nameof(username));
-            if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Password is required", nameof(password));
+            if(string.IsNullOrWhiteSpace(username)) return new Result<TokenResponse> { ErrorMessage = "Username is required", IsSuccess = false };
+            if (string.IsNullOrWhiteSpace(password)) return new Result<TokenResponse> { ErrorMessage = "Password is required", IsSuccess = false };
 
             var user = await _userRepository.GetByUsernameAsync(username, cancellationToken);
-            if(user == null)
-            {
-                throw new UnauthorizedAccessException("Invalid username or password");
-            }
+            if(user == null) return new Result<TokenResponse> { ErrorMessage = "Invalid username or password", IsSuccess = false };
             var verify = _passwordHasher.VerifyPassword(password, user.Password);
 
-            if (!verify)
-            {
-                throw new UnauthorizedAccessException("Invalid username or password");
-            }
+            if (!verify) return new Result<TokenResponse> { ErrorMessage = "Invalid username or password", IsSuccess = false };
+
             var token = new TokenResponse { Token = _tokenService.GenerateToken(user.Id) };
-            return token;
+            return new Result<TokenResponse> { Data = token, IsSuccess = true };
 
         }
 
-        public async Task<TokenResponse> RegisterAsync(RegistrationDTO model, CancellationToken cancellationToken = default)
+        public async Task<Result<TokenResponse>> RegisterAsync(RegistrationDTO model, CancellationToken cancellationToken = default)
         {
-            if (model == null) throw new ArgumentNullException(nameof(model));
-            if (string.IsNullOrWhiteSpace(model.Username)) throw new ArgumentException("Username is required", nameof(model.Username));
-            if (string.IsNullOrWhiteSpace(model.Email)) throw new ArgumentException("Email is required", nameof(model.Email));
-            if (string.IsNullOrWhiteSpace(model.Password)) throw new ArgumentException("Password is required", nameof(model.Password));
-            if (model.Password.Length < 6) throw new ArgumentException("Password must be at least 6 characters long", nameof(model.Password));
+            if (string.IsNullOrWhiteSpace(model.Username)) return new Result<TokenResponse> { ErrorMessage = "Password must be at least 6 characters long", IsSuccess = false};
+            if (string.IsNullOrWhiteSpace(model.Email)) return new Result<TokenResponse> { ErrorMessage = "Email is required", IsSuccess = false };
+            if (string.IsNullOrWhiteSpace(model.Password)) return new Result<TokenResponse> { ErrorMessage = "Password is required", IsSuccess = false };
+            if (model.Password.Length < 6) return new Result<TokenResponse> { ErrorMessage = "Password must be at least 6 characters long", IsSuccess = false };
 
             User user = new User
             {
@@ -70,13 +65,13 @@ namespace Chat.Application.Services
             if(model.ProfilePicture != null && model.ProfilePicture.Length > 0)
             {
                 var profilePicturePath = await _fileStorageService.UploadFile(user.Id, model.ProfilePicture);
-                user.ProfilePicturePath = profilePicturePath.IsSuccess ? profilePicturePath.Data : "user.png";
+                user.ProfilePicturePath = profilePicturePath.IsSuccess ? profilePicturePath.Data : null;
             }
 
             await _userRepository.AddAsync(user, cancellationToken);
 
             var token = new TokenResponse { Token = _tokenService.GenerateToken(user.Id) };
-            return token;
+            return new Result<TokenResponse> { Data = token, IsSuccess = true };
         }
     }
 }

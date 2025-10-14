@@ -1,4 +1,5 @@
 ﻿using Chat.Application.DTOs;
+using Chat.Application.Models;
 using Chat.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -17,5 +18,6 @@ namespace Chat.Application.Interfaces
         Task<Message> SendMessageAsync(Guid userId, Guid conversationId, string content, CancellationToken cancellationToken = default);
         Task AddParticipantAsync(Guid conversationId, Guid requestantId, Guid userId, CancellationToken cancellationToken = default);
         Task RemoveParticipantAsync(Guid conversationId, Guid requestantId, Guid userId, CancellationToken cancellationToken = default);
+        Task<Result> MarkMessagesAsReadAsync(Guid userId, Guid conversationId);
     }
 }

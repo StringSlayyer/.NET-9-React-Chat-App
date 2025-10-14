@@ -32,7 +32,11 @@ namespace Chat.API
                 options.AddDocumentTransformer<OpenApiServerTransformer>();
             });
 
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -146,7 +150,7 @@ namespace Chat.API
 
             app.UseMiddleware<JwtMiddleware>();
             app.MapControllers();
-            app.MapHub<ChatHub>("/chat");
+            app.MapHub<ChatHub>("/chat").RequireAuthorization();
 
             app.Run();
         }
