@@ -39,7 +39,7 @@ const ChatWindow = ({ conversation, loggedUserId }: ChatWindowProps) => {
     if (conversation) fetchMessage(conversation.id);
   }, [conversation, token]);
 
-  useEffect(() => {
+  /*useEffect(() => {
     console.log("Token in ChatWindow useEffect:", token);
     if (!token) return;
 
@@ -58,19 +58,25 @@ const ChatWindow = ({ conversation, loggedUserId }: ChatWindowProps) => {
         );
       }
 
-      conn?.on("ReceiveMessage", (msg: Message) => {
+      conn?.on("ReceiveMessage", async (msg: Message) => {
         if (msg.conversationId === conversation?.id) {
+          console.log("Received message:", msg);
           setMessages((prevMessages) => [...prevMessages, msg]);
+          await conn.invoke("MarkMessageAsRead", conversation.id);
         }
       });
 
       conn?.on(
         "MessagesMarkedAsRead",
-        (data: { conversationId: string; readerId: string }) => {
+        (data: { conversationId: string; senderId: string }) => {
+          console.log("Messages marked as read:", data);
+          console.log("Logged userId:", loggedUserId);
+          console.log("Reader userId:", data.senderId);
+
           if (data.conversationId === conversation?.id) {
             setMessages((prev) =>
               prev.map((msg) =>
-                msg.senderId === loggedUserId ? { ...msg, isRead: true } : msg
+                msg.senderId === loggedUserId ? msg : { ...msg, isRead: true }
               )
             );
           }
@@ -85,6 +91,65 @@ const ChatWindow = ({ conversation, loggedUserId }: ChatWindowProps) => {
         conn.invoke("LeaveConversation", conversation.id);
       }
       conn?.off("ReceiveMessage");
+      conn?.off("MessagesMarkedAsRead");
+    };
+  }, [conversation, token, loggedUserId]);*/
+
+  useEffect(() => {
+    console.log("Token in ChatWindow useEffect:", token);
+    if (!token || !conversation) return;
+
+    const setupConenction = async () => {
+      const conn = getConnection();
+      if (!conn || conn.state !== "Connected") {
+        console.log("Starting SignalR connection in ChatWindow");
+        await startConnection(token);
+      }
+
+      const activeConn = getConnection();
+
+      await activeConn?.invoke("JoinConversation", conversation.id);
+      await activeConn?.invoke("MarkMessageAsRead", conversation.id);
+      console.log("Joined conversation and ran mark as read:", conversation.id);
+
+      activeConn?.on("ReceiveMessage", async (msg: Message) => {
+        if (msg.conversationId === conversation?.id) {
+          console.log("Received message:", msg);
+          setMessages((prevMessages) => [...prevMessages, msg]);
+
+          const isConversationActive = document.visibilityState === "visible";
+          if (isConversationActive) {
+            await activeConn.invoke("MarkMessageAsRead", conversation.id);
+          }
+        }
+      });
+
+      activeConn?.on(
+        "MessagesMarkedAsRead",
+        (data: { conversationId: string; senderId: string }) => {
+          console.log("Messages marked as read:", data);
+          console.log("Logged userId:", loggedUserId);
+          console.log("Reader userId:", data.senderId);
+
+          if (data.conversationId === conversation?.id) {
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.senderId === loggedUserId ? { ...msg, isRead: true } : msg
+              )
+            );
+          }
+        }
+      );
+    };
+    setupConenction();
+    return () => {
+      const cleanupConn = getConnection();
+      if (cleanupConn && conversation) {
+        console.log("Leaving conversation:", conversation.id);
+        cleanupConn.invoke("LeaveConversation", conversation.id);
+        cleanupConn.off("ReceiveMessage");
+        cleanupConn.off("MessagesMarkedAsRead");
+      }
     };
   }, [conversation, token, loggedUserId]);
 
@@ -94,6 +159,7 @@ const ChatWindow = ({ conversation, loggedUserId }: ChatWindowProps) => {
     if (conn && conversation) {
       try {
         console.log("Odesílám zprávu přes SignalR:", content);
+        console.log(conn);
         await conn.invoke("SendMessage", conversation.id, content);
       } catch (error) {
         console.error("Failed to send message", error);

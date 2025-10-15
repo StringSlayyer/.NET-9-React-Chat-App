@@ -3,6 +3,9 @@ import * as signalR from "@microsoft/signalr";
 let connection: signalR.HubConnection | null = null;
 
 export const startConnection = async (token: string) => {
+  if (connection && connection.state === signalR.HubConnectionState.Connected) {
+    return connection;
+  }
   connection = new signalR.HubConnectionBuilder()
     .withUrl("http://localhost:8080/chat", {
       accessTokenFactory: () => token,

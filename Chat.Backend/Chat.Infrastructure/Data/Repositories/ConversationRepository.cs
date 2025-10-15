@@ -58,7 +58,7 @@ namespace Chat.Infrastructure.Data.Repositories
 
         public async Task MarkMessageAsRead(Guid userId, Guid conversationId)
         {
-            var messages = await _context.Messages.Where(m => m.ConversationId == conversationId && m.SenderId != userId && m.IsRead).ToListAsync();
+            var messages = await _context.Messages.Where(m => m.ConversationId == conversationId && m.SenderId != userId && !m.IsRead).ToListAsync();
             foreach (var message in messages)
             {
                 message.IsRead = true;
