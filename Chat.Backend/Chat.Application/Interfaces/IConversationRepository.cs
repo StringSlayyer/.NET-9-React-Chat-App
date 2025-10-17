@@ -1,4 +1,5 @@
-﻿using Chat.Domain.Entities;
+﻿using Chat.Application.Models;
+using Chat.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,5 +17,7 @@ namespace Chat.Application.Interfaces
         Task RemoveParticipantAsync(Guid conversationId, Guid userId, CancellationToken cancellationToken = default);
         Task<ConversationParticipant?> GetParticipantInConversation(Guid conversationId, Guid userId, CancellationToken cancellationToken = default);
         Task MarkMessageAsRead(Guid userId, Guid conversationId);
+        Task<IEnumerable<Conversation>> SearchConversationsAsync(Guid userId, string query, CancellationToken cancellationToken = default);
+        Task<Result<Conversation>> GetConversationAsync(Guid userId1, Guid userId2, CancellationToken cancellationToken = default);
     }
 }

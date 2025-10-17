@@ -25,6 +25,10 @@ export interface Participant {
   lastName: string;
 }
 
+export interface GetOrCreateConversationDTO {
+  user2: string;
+}
+
 const API_URL = "http://localhost:8080/api";
 
 export const getConversations = async (token: string) => {
@@ -37,4 +41,20 @@ export const getConversations = async (token: string) => {
     }
   );
   return response.data as ConversationDTO[];
+};
+
+export const getOrCreateConversation = async (
+  data: GetOrCreateConversationDTO,
+  token: string
+): Promise<ConversationDTO> => {
+  const response = await axios.post(
+    `${API_URL}/Conversation/getOrCreateConversation`,
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data as ConversationDTO;
 };

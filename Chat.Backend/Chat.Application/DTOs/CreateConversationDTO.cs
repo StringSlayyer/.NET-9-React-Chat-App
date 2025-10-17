@@ -11,5 +11,6 @@ namespace Chat.Application.DTOs
         public IEnumerable<Guid> ParticipantIds { get; set; } = Enumerable.Empty<Guid>();
         public Guid? AdminId { get; set; }
         public string? Name { get; set; }
+        public bool? IsGroup { get; set; }
     }
 }

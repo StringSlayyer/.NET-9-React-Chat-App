@@ -1,4 +1,5 @@
-﻿using Chat.Domain.Entities;
+﻿using Chat.Application.DTOs;
+using Chat.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,5 +16,6 @@ namespace Chat.Application.Interfaces
         Task AddAsync(User user, CancellationToken cancellationToken = default);
         Task<IEnumerable<User>> GetAllUsersAsync(CancellationToken cancellationToken = default);
         Task UpdateUser(User user, CancellationToken cancellationToken = default);
+        Task<IEnumerable<User>> SearchUsersAsync(string query, CancellationToken cancellationToken = default);
     }
 }

@@ -32,13 +32,13 @@ export const login = async (data: LoginDTO): Promise<Result<TokenResponse>> => {
 
 export const register = async (
   formData: FormData
-): Promise<Result<RegistrationDTO>> => {
+): Promise<Result<TokenResponse>> => {
   const response = await axios.post(`${API_URL}/register`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
   });
-  return response.data as Result<RegistrationDTO>;
+  return response.data as Result<TokenResponse>;
 };
 
 export const getUserId = async (token: string): Promise<UserIdResponse> => {

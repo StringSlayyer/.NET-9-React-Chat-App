@@ -14,6 +14,7 @@ namespace Chat.Application.DTOs
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public DateTime? CreatedAt { get; set; }
+        public string? ProfilePictureUrl { get; set; }
 
     }
 }

@@ -39,62 +39,6 @@ const ChatWindow = ({ conversation, loggedUserId }: ChatWindowProps) => {
     if (conversation) fetchMessage(conversation.id);
   }, [conversation, token]);
 
-  /*useEffect(() => {
-    console.log("Token in ChatWindow useEffect:", token);
-    if (!token) return;
-
-    const init = async () => {
-      console.log("Starting SignalR connection in ChatWindow");
-      const conn = await startConnection(token);
-      console.log("SignalR connection started in ChatWindow:", conn);
-
-      if (conversation) {
-        await conn.invoke("JoinConversation", conversation.id);
-
-        await conn.invoke("MarkMessageAsRead", conversation.id);
-        console.log(
-          "Joined conversation and ran mark as read:",
-          conversation.id
-        );
-      }
-
-      conn?.on("ReceiveMessage", async (msg: Message) => {
-        if (msg.conversationId === conversation?.id) {
-          console.log("Received message:", msg);
-          setMessages((prevMessages) => [...prevMessages, msg]);
-          await conn.invoke("MarkMessageAsRead", conversation.id);
-        }
-      });
-
-      conn?.on(
-        "MessagesMarkedAsRead",
-        (data: { conversationId: string; senderId: string }) => {
-          console.log("Messages marked as read:", data);
-          console.log("Logged userId:", loggedUserId);
-          console.log("Reader userId:", data.senderId);
-
-          if (data.conversationId === conversation?.id) {
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.senderId === loggedUserId ? msg : { ...msg, isRead: true }
-              )
-            );
-          }
-        }
-      );
-    };
-    init();
-
-    return () => {
-      const conn = getConnection();
-      if (conn && conversation) {
-        conn.invoke("LeaveConversation", conversation.id);
-      }
-      conn?.off("ReceiveMessage");
-      conn?.off("MessagesMarkedAsRead");
-    };
-  }, [conversation, token, loggedUserId]);*/
-
   useEffect(() => {
     console.log("Token in ChatWindow useEffect:", token);
     if (!token || !conversation) return;
@@ -134,7 +78,9 @@ const ChatWindow = ({ conversation, loggedUserId }: ChatWindowProps) => {
           if (data.conversationId === conversation?.id) {
             setMessages((prev) =>
               prev.map((msg) =>
-                msg.senderId === loggedUserId ? { ...msg, isRead: true } : msg
+                msg.senderId === loggedUserId && data.senderId !== loggedUserId
+                  ? { ...msg, isRead: true }
+                  : msg
               )
             );
           }

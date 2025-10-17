@@ -1,4 +1,5 @@
-﻿using Chat.Application.Interfaces;
+﻿using Chat.Application.DTOs;
+using Chat.Application.Interfaces;
 using Chat.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -43,6 +44,13 @@ namespace Chat.Infrastructure.Data.Repositories
         {
             var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
             return user;
+        }
+
+        public async Task<IEnumerable<User>> SearchUsersAsync(string query, CancellationToken cancellationToken = default)
+        {
+            query = query.ToLower();
+            return await _context.Users.AsNoTracking().Where(u => u.FirstName.ToLower().StartsWith(query) || u.LastName.ToLower().StartsWith(query) || u.Username.ToLower().StartsWith(query))
+                .Take(10).ToListAsync(cancellationToken);
         }
 
         public Task UpdateUser(User user, CancellationToken cancellationToken = default)

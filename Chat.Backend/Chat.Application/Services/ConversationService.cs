@@ -74,6 +74,43 @@ namespace Chat.Application.Services
             return result.Reverse();
         }
 
+        public async Task<Result<ConversationDTO>> GetOrCreateConversation(GetOrCreateConversationDTO request, CancellationToken cancellationToken = default)
+        {
+            if (request.User1 == Guid.Empty || request.User2 == Guid.Empty) return Result<ConversationDTO>.Failure("Missing user ID(s)");
+            var existingConversation = await _conversationRepository.GetConversationAsync(request.User1, request.User2, cancellationToken);
+            if (existingConversation.IsSuccess && existingConversation.Data != null)
+            {
+                var convo = existingConversation.Data;
+                var convoDto = new ConversationDTO
+                {
+                    Id = convo.Id,
+                    Name = convo.Name,
+                    Participants = convo.Participants.Select(p => new ConversationParticipantDTO
+                    {
+                        FirstName = p.User.FirstName,
+                        LastName = p.User.LastName,
+                        Id = p.User.Id
+                    }).ToList()
+                };
+                return Result<ConversationDTO>.Success(convoDto);
+            }
+            
+            var participantIds = new List<Guid> { request.User1, request.User2 };
+            var newConversation = await CreateConversationAsync(participantIds, request.User1, cancellationToken: cancellationToken);
+            var newConvoDto = new ConversationDTO
+            {
+                Id = newConversation.Id,
+                Name = newConversation.Name,
+                Participants = newConversation.Participants.Select(p => new ConversationParticipantDTO
+                {
+                    FirstName = p.User.FirstName,
+                    LastName = p.User.LastName,
+                    Id = p.User.Id
+                }).ToList()
+            };
+            return Result<ConversationDTO>.Success(newConvoDto);
+        }
+
         public async Task<IEnumerable<Message>> GetRecentMessagesAsync(Guid conversationId, int count, CancellationToken cancellationToken = default)
         {
             if (conversationId == Guid.Empty)

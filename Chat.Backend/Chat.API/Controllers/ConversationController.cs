@@ -77,6 +77,24 @@ namespace Chat.API.Controllers
             return Ok(conversations);
         }
 
+        [HttpPost("getOrCreateConversation")]
+        public async Task<IActionResult> GetOrCreateConversation([FromBody] GetOrCreateConversationDTO request)
+        {
+            var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
+            if(userId == Guid.Empty)
+            {
+                return Unauthorized("Invalid token or user not found.");
+            }
+            request.User1 = userId;
+            var result = await _conversationService.GetOrCreateConversation(request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.ErrorMessage);
+            }
+            return Ok(result.Data);
+
+        }
+
 
     }
 }

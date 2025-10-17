@@ -17,6 +17,7 @@ namespace Chat.Application
             services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IConversationService, ConversationService>();
+            services.AddScoped<ISearchService, SearchService>();
 
             return services;
         }

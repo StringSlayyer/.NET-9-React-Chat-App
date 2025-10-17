@@ -1,4 +1,6 @@
-﻿using Chat.Application.Interfaces;
+﻿using Chat.Application.DTOs;
+using Chat.Application.Interfaces;
+using Chat.Application.Models;
 using Chat.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -32,7 +34,13 @@ namespace Chat.Infrastructure.Data.Repositories
 
             await _context.Conversations.AddAsync(conversation, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
-            return conversation;
+
+            var loadedConversation = await _context.Conversations
+            .Include(c => c.Participants)
+                .ThenInclude(p => p.User)
+            .FirstOrDefaultAsync(c => c.Id == conversation.Id, cancellationToken);
+
+            return loadedConversation!;
         }
 
         public async Task<Conversation?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -47,6 +55,19 @@ namespace Chat.Infrastructure.Data.Repositories
                     .ThenInclude(cp => cp.User)
                 .Where(c => c.Participants.Any(p => p.UserId == userId))
                 .ToListAsync(cancellationToken);
+        }
+
+        public async Task<Result<Conversation>> GetConversationAsync(Guid userId1, Guid userId2, CancellationToken cancellationToken = default)
+        {
+            var existing = await _context.Conversations
+                .Include(c => c.Participants)
+                .ThenInclude(p => p.User)
+                .FirstOrDefaultAsync(c => !c.IsGroup &&
+                    c.Participants.Any(p => p.UserId == userId1) &&
+                    c.Participants.Any(p => p.UserId == userId2), cancellationToken);
+
+            if (existing != null) return Result<Conversation>.Success(existing);
+            return Result<Conversation>.Failure("Conversation not found.");
         }
 
         public async Task<ConversationParticipant?> GetParticipantInConversation(Guid conversationId, Guid userId, CancellationToken cancellationToken = default)
@@ -72,6 +93,19 @@ namespace Chat.Infrastructure.Data.Repositories
             await _context.ConversationParticipants
                 .Where(cp => cp.ConversationId == conversationId && cp.UserId == userId)
                 .ExecuteDeleteAsync(cancellationToken);
+        }
+
+        public async Task<IEnumerable<Conversation>> SearchConversationsAsync(Guid userId, string query, CancellationToken cancellationToken = default)
+        {
+            query = query.ToLower();
+            return await _context.Conversations.AsNoTracking()
+                .Where(c => c.Participants.Any(p => p.UserId == userId) &&
+                (c.Name.ToLower().Contains(query) || c.Participants.Any(p => (p.User.FirstName + " " + p.User.LastName).ToLower().Contains(query) ||
+                p.User.Username.ToLower().Contains(query))))
+                .Include(c => c.Participants)
+                .ThenInclude(c => c.User)
+                .Take(10)
+                .ToListAsync(cancellationToken);
         }
     }
 }
