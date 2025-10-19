@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { Message } from "./messageApi";
 
 export interface CreateConversationDTO {
   participantIds: string[];
@@ -13,6 +14,7 @@ export interface ConversationDTO {
   isGroup: boolean;
   groupAvatarId?: string;
   avatarId?: string;
+  lastMessage?: Message;
 }
 
 export interface GetConversationsDTO {

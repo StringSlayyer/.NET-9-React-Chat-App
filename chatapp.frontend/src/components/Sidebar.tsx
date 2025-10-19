@@ -13,12 +13,14 @@ const Sidebar = ({
   loggedUserId,
   token,
   onSelectConversation,
+  onAddConversation,
 }: {
   conversations: ConversationDTO[];
   loading: boolean;
   loggedUserId: string;
   token: string;
   onSelectConversation: (conversation: ConversationDTO) => void;
+  onAddConversation: (conversation: ConversationDTO) => void;
 }) => {
   const [searchResults, setSearchResults] = useState<SearchDTO | null>(null);
 
@@ -43,6 +45,8 @@ const Sidebar = ({
         { user2: userId },
         token
       );
+
+      onAddConversation(conversation);
       onSelectConversation(conversation);
       setSearchResults(null);
     } catch (error) {
@@ -98,8 +102,24 @@ const Sidebar = ({
                   className="p-2 hover:bg-gray-700 rounded cursor-pointer"
                   onClick={() => onSelectConversation(conversation)}
                 >
-                  <UserAvatar userId={avatarUrl} token={token} size={40} />
-                  <span className="text-gray-400 hover:text-white">{name}</span>
+                  <div className="flex items-center gap-2">
+                    <UserAvatar userId={avatarUrl} token={token} size={40} />
+                    <div>
+                      <span className="text-gray-200 font-semibold block">
+                        {name}
+                      </span>
+                      <span className="text-gray-400 text-sm truncate w-40 block">
+                        {conversation.lastMessage?.content || "No messages yet"}
+                      </span>
+                    </div>
+                  </div>
+                  {conversation.lastMessage && (
+                    <span className="text-gray-500 text-xs">
+                      {new Date(
+                        conversation.lastMessage.sentAt
+                      ).toLocaleTimeString()}
+                    </span>
+                  )}
                 </div>
               );
             })

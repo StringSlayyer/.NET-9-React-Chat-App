@@ -39,6 +39,23 @@ const ChatPage = () => {
     };
     fetchConversations();
   }, [token]);
+
+  const addOrUpdateConversation = (conversation: ConversationDTO) => {
+    setConversations((prev) => {
+      const exists = prev.find((c) => c.id === conversation.id);
+      if (exists) {
+        const update = prev.map((c) =>
+          c.id === conversation.id ? conversation : c
+        );
+        return [
+          conversation,
+          ...update.filter((c) => c.id !== conversation.id),
+        ];
+      } else {
+        return [conversation, ...prev];
+      }
+    });
+  };
   return (
     <div className="h-full w-screen flex">
       <div className="w-1/4 bg-gray-800 text-white py-1">
@@ -48,6 +65,7 @@ const ChatPage = () => {
           loading={loading}
           token={token!}
           onSelectConversation={setSelectedConversation}
+          onAddConversation={addOrUpdateConversation}
           loggedUserId={loggedUserId}
         />
       </div>

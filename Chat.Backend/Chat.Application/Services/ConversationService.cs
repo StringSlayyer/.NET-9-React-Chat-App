@@ -125,25 +125,30 @@ namespace Chat.Application.Services
             if (userId == Guid.Empty)
                 throw new ArgumentException("User ID cannot be empty.", nameof(userId));
             var conversations = await _conversationRepository.GetByUserIdAsync(userId, cancellationToken);
-            var result = new List<ConversationDTO>();
-            foreach (var convo in conversations)
+            var result = conversations.Select(c => new ConversationDTO
             {
-                var convoDto = new ConversationDTO
+                Id = c.Id,
+                Name = c.Name,
+                Participants = c.Participants.Select(p => new ConversationParticipantDTO
                 {
-                    Id = convo.Id,
-                    Name = convo.Name,
-                    Participants = convo.Participants.Select(p => new ConversationParticipantDTO
-                    {
-                        FirstName = p.User.FirstName,
-                        LastName = p.User.LastName,
-                        Id = p.User.Id
-                    }).ToList()
-                };
-                result.Add(convoDto);
-            }
-
+                    FirstName = p.User.FirstName,
+                    LastName = p.User.LastName,
+                    Id = p.User.Id
+                }).ToList(),
+                LastMessage = c.Messages
+                        .OrderByDescending(m => m.SentAt)
+                        .Select(m => new MessagesDTO
+                        {
+                            Id = m.Id,
+                            SenderId = m.SenderId,
+                            ConversationId = m.ConversationId,
+                            Content = m.Content,
+                            SentAt = m.SentAt,
+                            IsRead = m.IsRead
+                        })
+                        .FirstOrDefault()
+            }).ToList();
             
-
 
             return result;
         }

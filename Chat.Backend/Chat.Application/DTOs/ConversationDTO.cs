@@ -12,5 +12,6 @@ namespace Chat.Application.DTOs
         public string? Name { get; set; }
         public bool? IsGroup { get; set; }
         public List<ConversationParticipantDTO> Participants { get; set; } = new List<ConversationParticipantDTO>();
+        public MessagesDTO? LastMessage { get; set; }
     }
 }

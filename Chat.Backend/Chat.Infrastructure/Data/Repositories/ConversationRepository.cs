@@ -53,7 +53,9 @@ namespace Chat.Infrastructure.Data.Repositories
             return await _context.Conversations.AsNoTracking()
                 .Include(c=> c.Participants)
                     .ThenInclude(cp => cp.User)
+                .Include(c => c.Messages.OrderByDescending(m => m.SentAt).Take(1))
                 .Where(c => c.Participants.Any(p => p.UserId == userId))
+                .OrderByDescending(c => c.Messages.Max(m => m.SentAt))
                 .ToListAsync(cancellationToken);
         }
 
