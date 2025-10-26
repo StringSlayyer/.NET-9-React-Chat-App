@@ -15,6 +15,7 @@ export interface ConversationDTO {
   groupAvatarId?: string;
   avatarId?: string;
   lastMessage?: Message;
+  unreadMessagesCount: number;
 }
 
 export interface GetConversationsDTO {

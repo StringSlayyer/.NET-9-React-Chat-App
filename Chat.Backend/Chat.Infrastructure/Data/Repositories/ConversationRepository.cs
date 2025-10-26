@@ -48,15 +48,85 @@ namespace Chat.Infrastructure.Data.Repositories
             return await _context.Conversations.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
         }
 
-        public async Task<IEnumerable<Conversation>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+        public async Task<Result<ConversationDTO>> GetByIdForReciever(Guid conversationId, Guid currentUserId, CancellationToken cancellationToken)
         {
-            return await _context.Conversations.AsNoTracking()
+            var conversation = await _context.Conversations
                 .Include(c=> c.Participants)
-                    .ThenInclude(cp => cp.User)
+                .ThenInclude(cp => cp.User)
                 .Include(c => c.Messages.OrderByDescending(m => m.SentAt).Take(1))
+                .FirstOrDefaultAsync(c => c.Id == conversationId, cancellationToken);
+
+            if (conversation == null) Result.Failure("Conversation not found.");
+
+            var unreadCount = await _context.Messages
+                .CountAsync(m =>
+                m.ConversationId == conversationId
+                && m.SenderId != currentUserId && !m.IsRead);
+
+            var dto = new ConversationDTO
+            {
+                Id = conversation.Id,
+                Name = conversation.Name,
+                IsGroup = conversation.IsGroup,
+                Participants = conversation.Participants.Select(p => new ConversationParticipantDTO
+                {
+                    Id = p.User.Id,
+                    FirstName = p.User.FirstName,
+                    LastName = p.User.LastName
+                }).ToList(),
+                LastMessage = conversation.Messages
+                    .OrderByDescending(m => m.SentAt)
+                    .Select(m => new MessagesDTO
+                    {
+                        Id = m.Id,
+                        Content = m.Content,
+                        SentAt = m.SentAt,
+                        IsRead = m.IsRead
+                    })
+                    .FirstOrDefault(),
+                UnreadMessagesCount = unreadCount
+            };
+
+            return Result<ConversationDTO>.Success(dto);
+        }
+
+        public async Task<IEnumerable<ConversationDTO>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+        {
+            var conversations = await _context.Conversations
+                .AsNoTracking()
                 .Where(c => c.Participants.Any(p => p.UserId == userId))
-                .OrderByDescending(c => c.Messages.Max(m => m.SentAt))
+                .Select(c => new ConversationDTO
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Participants = c.Participants.Select(p => new ConversationParticipantDTO
+                    {
+                        Id = p.User.Id,
+                        FirstName = p.User.FirstName,
+                        LastName = p.User.LastName
+                    }).ToList(),
+                    LastMessage = c.Messages
+                        .OrderByDescending(m => m.SentAt)
+                        .Select(m => new MessagesDTO
+                        {
+                            Id = m.Id,
+                            Content = m.Content,
+                            SentAt = m.SentAt,
+                            IsRead = m.IsRead
+                        })
+                        .FirstOrDefault(),
+                    UnreadMessagesCount = c.Messages.Count(m => m.SenderId != userId && !m.IsRead)
+                })
+                .OrderByDescending(c => c.LastMessage.SentAt)
                 .ToListAsync(cancellationToken);
+
+            return conversations;
+            /*.Include(c=> c.Participants)
+                .ThenInclude(cp => cp.User)
+            .Include(c => c.Messages.OrderByDescending(m => m.SentAt).Take(1))
+            .Where(c => c.Participants.Any(p => p.UserId == userId))
+            .OrderByDescending(c => c.Messages.Max(m => m.SentAt))
+            .ToListAsync(cancellationToken);*/
         }
 
         public async Task<Result<Conversation>> GetConversationAsync(Guid userId1, Guid userId2, CancellationToken cancellationToken = default)

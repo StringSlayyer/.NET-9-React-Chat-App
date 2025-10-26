@@ -25,9 +25,10 @@ namespace Chat.API.Controllers
             return Ok(users);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserById(Guid id, CancellationToken cancellationToken)
+        [HttpGet("getUser")]
+        public async Task<IActionResult> GetUserById(CancellationToken cancellationToken)
         {
+            var id = _tokenService.GetUserIdFromClaimsPrincipal(User);
             var user = await _userService.GetByIdAsync(id, cancellationToken);
             if (user == null) return NotFound();
             return Ok(user);

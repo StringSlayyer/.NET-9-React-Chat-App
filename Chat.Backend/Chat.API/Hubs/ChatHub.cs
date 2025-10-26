@@ -11,6 +11,7 @@ namespace Chat.API.Hubs
 
         private static readonly Dictionary<string, HashSet<string>> GroupMembers = new();
         private static readonly object GroupLock = new();
+        private static readonly Dictionary<Guid, HashSet<string>> UserConnections = new();
 
         public ChatHub(IConversationService conversationService, ILogger<ChatHub> logger)
         {
@@ -30,6 +31,25 @@ namespace Chat.API.Hubs
                 sentMessage.SentAt,
                 sentMessage.ConversationId
             });
+
+            var conversationDto = await _conversationService.GetByIdForReciever(conversationId, senderId);
+            if (!conversationDto.IsSuccess)
+            {
+                _logger.LogError("Failed to retrieve conversation {ConversationId} after sending message: {Error}", conversationId, conversationDto.ErrorMessage);
+                return;
+            }
+            var participants = conversationDto.Data.Participants;
+
+            foreach(var participant in participants)
+            {
+                if(UserConnections.TryGetValue(participant.Id, out var connections))
+                {
+                    foreach(var connectionId in connections)
+                    {
+                        await Clients.Client(connectionId).SendAsync("ConversationUpdated", conversationDto.Data);
+                    }
+                }
+            }
         }
 
         public async Task JoinConversation(Guid conversationId)
@@ -84,6 +104,18 @@ namespace Chat.API.Hubs
 
         public override Task OnConnectedAsync()
         {
+            var userId = Context.User?.FindFirst("UserId")?.Value;
+            if(Guid.TryParse(userId, out var uid))
+            {
+                lock (UserConnections)
+                {
+                    if (!UserConnections.ContainsKey(uid))
+                    {
+                        UserConnections[uid] = new HashSet<string>();
+                    }
+                    UserConnections[uid].Add(Context.ConnectionId);
+                }
+            }
             return base.OnConnectedAsync();
         }
 
@@ -96,7 +128,25 @@ namespace Chat.API.Hubs
 
                 
             }
+            var userId = Context.User?.FindFirst("UserId")?.Value;
+            if (Guid.TryParse(userId, out var uid))
+            {
+                lock (UserConnections)
+                {
+                    if (UserConnections.TryGetValue(uid, out var conns))
+                    {
+                        conns.Remove(Context.ConnectionId);
+                        _logger.LogInformation("Removing connection {ConnectionId} for user {UserId}", Context.ConnectionId, uid);
+                        if (conns.Count == 0)
+                        {
+                            UserConnections.Remove(uid);
+                            _logger.LogInformation("No more connections for user {UserId}, removed from UserConnections", uid);
+                        }
+                    }
+                }
+            }
             await base.OnDisconnectedAsync(ex);
+                
         }
     }
 }

@@ -4,7 +4,7 @@ import type { SearchDTO } from "../api/searchApi";
 
 interface SearchResultProps {
   results: SearchDTO;
-  loggedUserId: string;
+  loggedUserId: string | undefined;
   token: string;
   onSelectConversation: (conversation: ConversationDTO) => void;
   onSelectUser: (userId: string) => void;

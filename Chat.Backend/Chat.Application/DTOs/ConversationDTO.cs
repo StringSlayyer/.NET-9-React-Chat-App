@@ -13,5 +13,6 @@ namespace Chat.Application.DTOs
         public bool? IsGroup { get; set; }
         public List<ConversationParticipantDTO> Participants { get; set; } = new List<ConversationParticipantDTO>();
         public MessagesDTO? LastMessage { get; set; }
+        public int UnreadMessagesCount { get; set; }
     }
 }

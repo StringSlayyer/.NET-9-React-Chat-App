@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   getOrCreateConversation,
   type ConversationDTO,
@@ -7,22 +7,74 @@ import UserAvatar from "./UserAvatar";
 import { search, type SearchDTO } from "../api/searchApi";
 import SearchBar from "./SearchBar";
 import SearchResults from "./SearchResult";
+import { getConnection, startConnection } from "../api/signalService";
+import LoggedUser from "./LoggedUser";
+import type { UserDTO } from "../api/userApi";
+
 const Sidebar = ({
   conversations,
+  setConversations,
   loading,
-  loggedUserId,
+  loggedUser,
   token,
   onSelectConversation,
   onAddConversation,
+  onEditProfile,
+  onLogout,
 }: {
   conversations: ConversationDTO[];
+  setConversations: React.Dispatch<React.SetStateAction<ConversationDTO[]>>;
   loading: boolean;
-  loggedUserId: string;
+  loggedUser: UserDTO | null;
   token: string;
   onSelectConversation: (conversation: ConversationDTO) => void;
   onAddConversation: (conversation: ConversationDTO) => void;
+  onEditProfile: () => void;
+  onLogout: () => void;
 }) => {
   const [searchResults, setSearchResults] = useState<SearchDTO | null>(null);
+
+  useEffect(() => {
+    if (!token) return;
+
+    const setupSignalR = async () => {
+      let conn = getConnection();
+      if (!conn || conn.state !== "Connected") {
+        await startConnection(token);
+        conn = getConnection();
+      }
+      console.log(conn);
+
+      conn?.on(
+        "ConversationUpdated",
+        (updatedConversation: ConversationDTO) => {
+          console.log("conversation updated received:", updatedConversation);
+
+          setConversations((prev) => {
+            const existing = prev.find((c) => c.id === updatedConversation.id);
+            if (existing) {
+              const updated = prev.map((c) =>
+                c.id === updatedConversation.id ? updatedConversation : c
+              );
+              return [
+                updatedConversation,
+                ...updated.filter((c) => c.id !== updatedConversation.id),
+              ];
+            } else {
+              return [updatedConversation, ...prev];
+            }
+          });
+        }
+      );
+    };
+
+    setupSignalR();
+
+    return () => {
+      const conn = getConnection();
+      conn?.off("ConversationUpdated");
+    };
+  }, [token]);
 
   const handleSearch = async (query: string) => {
     if (query.length < 2) {
@@ -62,9 +114,9 @@ const Sidebar = ({
       };
     }
     console.log("Participants:", conversation.participants);
-    console.log("Logged User ID:", loggedUserId);
+    console.log("Logged User ID:", loggedUser?.id);
     const otherParticipant = conversation.participants.find(
-      (p) => p.id !== loggedUserId
+      (p) => p.id !== loggedUser?.id
     );
     console.log("Other Participant:", otherParticipant);
     return {
@@ -79,11 +131,17 @@ const Sidebar = ({
   }
   return (
     <div className="h-full p-4 overflow-y-auto bg-gray-950">
+      <LoggedUser
+        token={token}
+        userDTO={loggedUser}
+        onEditProfile={onEditProfile}
+        onLogout={onLogout}
+      />
       <SearchBar onSearch={handleSearch} />
       {searchResults ? (
         <SearchResults
           results={searchResults}
-          loggedUserId={loggedUserId}
+          loggedUserId={loggedUser?.id}
           token={token}
           onSelectConversation={onSelectConversation}
           onSelectUser={handleSelectUser}
@@ -96,6 +154,8 @@ const Sidebar = ({
           ) : (
             conversations.map((conversation) => {
               const { name, avatarUrl } = getConversationDisplay(conversation);
+              console.log("Rendering conversation:", conversation);
+              console.log("Current name and url" + name + ", " + avatarUrl);
               return (
                 <div
                   key={conversation.id}
@@ -108,18 +168,19 @@ const Sidebar = ({
                       <span className="text-gray-200 font-semibold block">
                         {name}
                       </span>
-                      <span className="text-gray-400 text-sm truncate w-40 block">
-                        {conversation.lastMessage?.content || "No messages yet"}
-                      </span>
+                      <div className="flex">
+                        <span className="text-gray-400 text-sm truncate w-40 block">
+                          {conversation.lastMessage?.content ||
+                            "No messages yet"}
+                        </span>
+                        {conversation.unreadMessagesCount > 0 && (
+                          <span className="bg-blue-600 text-white text-xs rounded-full px-2 py-0.5">
+                            {conversation.unreadMessagesCount}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  {conversation.lastMessage && (
-                    <span className="text-gray-500 text-xs">
-                      {new Date(
-                        conversation.lastMessage.sentAt
-                      ).toLocaleTimeString()}
-                    </span>
-                  )}
                 </div>
               );
             })

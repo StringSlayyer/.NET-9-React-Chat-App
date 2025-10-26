@@ -52,6 +52,16 @@ namespace Chat.Application.Services
 
         }
 
+        public Task<Result<ConversationDTO>> GetByIdForReciever(Guid conversationId, Guid currentUserId, CancellationToken cancellationToken = default)
+        {
+            if (conversationId == Guid.Empty)
+                Result<ConversationDTO>.Failure("ConversationId cant be empty");
+            if (currentUserId == Guid.Empty)
+                Result<ConversationDTO>.Failure("CurrentUserId cant be empty");
+
+            return _conversationRepository.GetByIdForReciever(conversationId, currentUserId, cancellationToken);
+        }
+
         public async Task<IEnumerable<MessagesDTO>> GetMessagesPagedAsync(Guid conversationId, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
         {
             if(conversationId == Guid.Empty)
@@ -125,32 +135,10 @@ namespace Chat.Application.Services
             if (userId == Guid.Empty)
                 throw new ArgumentException("User ID cannot be empty.", nameof(userId));
             var conversations = await _conversationRepository.GetByUserIdAsync(userId, cancellationToken);
-            var result = conversations.Select(c => new ConversationDTO
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Participants = c.Participants.Select(p => new ConversationParticipantDTO
-                {
-                    FirstName = p.User.FirstName,
-                    LastName = p.User.LastName,
-                    Id = p.User.Id
-                }).ToList(),
-                LastMessage = c.Messages
-                        .OrderByDescending(m => m.SentAt)
-                        .Select(m => new MessagesDTO
-                        {
-                            Id = m.Id,
-                            SenderId = m.SenderId,
-                            ConversationId = m.ConversationId,
-                            Content = m.Content,
-                            SentAt = m.SentAt,
-                            IsRead = m.IsRead
-                        })
-                        .FirstOrDefault()
-            }).ToList();
+           
             
 
-            return result;
+            return conversations;
         }
 
         public async Task<Result> MarkMessagesAsReadAsync(Guid userId, Guid conversationId)

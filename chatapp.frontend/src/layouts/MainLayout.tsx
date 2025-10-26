@@ -3,20 +3,21 @@ import { Outlet } from "react-router-dom";
 const MainLayout = () => {
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-white">
-      {/* Header */}
+      {/* Header 
       <header className="bg-primary p-4 flex items-center justify-center shadow-md">
         <h1 className="text-xl font-bold">ChatApp</h1>
       </header>
-
+*/}
       {/* Main content (vyplní zbytek výšky) */}
       <main className="flex-1 min-h-0 flex  justify-center">
         <Outlet />
       </main>
 
-      {/* Footer */}
+      {/* Footer 
       <footer className="bg-gray-800 h-[4vh] text-center text-sm">
         © 2025 ChatApp
       </footer>
+      */}
     </div>
   );
 };

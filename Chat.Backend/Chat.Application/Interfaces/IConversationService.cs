@@ -20,5 +20,6 @@ namespace Chat.Application.Interfaces
         Task RemoveParticipantAsync(Guid conversationId, Guid requestantId, Guid userId, CancellationToken cancellationToken = default);
         Task<Result> MarkMessagesAsReadAsync(Guid userId, Guid conversationId);
         Task<Result<ConversationDTO>> GetOrCreateConversation(GetOrCreateConversationDTO request, CancellationToken cancellationToken = default);
+        Task<Result<ConversationDTO>> GetByIdForReciever(Guid conversationId, Guid currentUserId, CancellationToken cancellationToken = default);    
     }
 }

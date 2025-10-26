@@ -23,6 +23,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserDTO | null>(null);
 
   const login = (newToken: string) => {
+    logout();
     setToken(newToken);
     localStorage.setItem("token", newToken);
   };

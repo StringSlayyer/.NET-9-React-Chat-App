@@ -33,9 +33,9 @@ const RegisterPage = () => {
       }
       const res = await register(formData);
       console.log("Registration response:", res);
-      if (res.token) {
+      if (res.data.token) {
         console.log("Registration successful");
-        saveToken(res.token);
+        saveToken(res.data.token);
         console.log("Redirecting to /chat");
         navigate("/chat");
         console.log("Redirected to /chat");

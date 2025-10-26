@@ -17,36 +17,34 @@ const UserAvatar = ({
   const [avatarUrl, setAvatarUrl] = useState<string>("");
 
   useEffect(() => {
-    console.log("UserAvatar props - userId:", userId, "token:", token);
     if (!userId || !token) {
-      console.log("No userId or token provided, using default avatar.");
       setAvatarUrl("/user.png");
       return;
     }
 
-    let objectUrl: string | null = null;
+    let cancelled = false;
+    let prevObjectUrl: string | null = null;
 
     const loadAvatar = async () => {
       try {
-        console.log("Loading avatar...");
         const response = await getUserAvatar(userId, token);
-        console.log("Avatar blob URL loaded:", response);
-        if (avatarUrl && avatarUrl.startsWith("blob:")) {
-          URL.revokeObjectURL(avatarUrl);
+        if (!cancelled) {
+          if (prevObjectUrl) URL.revokeObjectURL(prevObjectUrl);
+          prevObjectUrl = response;
+          setAvatarUrl(response);
         }
-        objectUrl = response;
-        setAvatarUrl(response);
       } catch (error) {
-        console.error("Failed to load avatar", error);
-        setAvatarUrl("/user.png");
+        console.error("Failed to load user avatar", error);
+        if (!cancelled) setAvatarUrl("/user.png");
       }
     };
 
     loadAvatar();
+
     return () => {
-      if (objectUrl) {
-        console.log("Revoking object URL", objectUrl);
-        URL.revokeObjectURL(objectUrl);
+      cancelled = true;
+      if (prevObjectUrl) {
+        URL.revokeObjectURL(prevObjectUrl);
       }
     };
   }, [userId, token]);

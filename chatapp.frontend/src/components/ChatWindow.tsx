@@ -115,7 +115,7 @@ const ChatWindow = ({ conversation, loggedUserId }: ChatWindowProps) => {
 
   if (!conversation) {
     return (
-      <div className="h-screen flex items-center justify-center">
+      <div className="h-full flex items-center justify-center">
         Vyber konverzaci
       </div>
     );
