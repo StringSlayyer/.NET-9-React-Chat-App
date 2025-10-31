@@ -25,6 +25,22 @@ namespace Chat.Application.Services
             _fileStorageService = fileStorageService;
         }
 
+        public async Task<Result> ChangePasswordAsync(Guid userId, ChangePasswordDTO model, CancellationToken cancellationToken = default)
+        {
+            if(string.IsNullOrWhiteSpace(model.CurrentPassword) || string.IsNullOrWhiteSpace(model.NewPassword))
+                return Result.Failure("Current password and new password are required");
+
+            var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+            if (user == null) return Result.Failure("User not found");
+
+            var verify = _passwordHasher.VerifyPassword(model.CurrentPassword, user.Password);
+            if (!verify) return Result.Failure("Current password is incorrect");
+
+            var newHashedPassword = _passwordHasher.HashPassword(model.NewPassword);
+            var result = await _userRepository.UpdatePasswordAsync(userId, newHashedPassword, cancellationToken);
+            return result;
+        }
+
         public async Task<Result<TokenResponse>> LoginAsync(string username, string password, CancellationToken cancellationToken = default)
         {
             if(string.IsNullOrWhiteSpace(username)) return new Result<TokenResponse> { ErrorMessage = "Username is required", IsSuccess = false };

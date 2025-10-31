@@ -54,6 +54,15 @@ namespace Chat.API.Controllers
 
         }
 
-        
+        [HttpPut("updateProfile")]
+        public async Task<IActionResult> UpdateProfile([FromForm] UpdateProfileDTO model, CancellationToken cancellationToken)
+        {
+            var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
+            var result = await _userService.UpdateProfileAsync(userId, model, cancellationToken);
+            if (!result.IsSuccess) return BadRequest(result.ErrorMessage);
+            return Ok();
+        }
+
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Chat.Application.DTOs;
 using Chat.Application.Interfaces;
+using Chat.Application.Models;
 using Chat.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -53,10 +54,26 @@ namespace Chat.Infrastructure.Data.Repositories
                 .Take(10).ToListAsync(cancellationToken);
         }
 
-        public Task UpdateUser(User user, CancellationToken cancellationToken = default)
+        public async Task<Result> UpdatePasswordAsync(Guid userId, string newPassword, CancellationToken cancellationToken = default)
+        {
+            var affected = await _context.Users
+                .Where(u => u.Id == userId)
+                .ExecuteUpdateAsync(u => u.SetProperty(x => x.Password, newPassword));
+
+            return affected > 0
+                ? Result.Success()
+                : Result.Failure("User not found");
+        }
+
+        public async Task<Result> UpdateUser(User user, CancellationToken cancellationToken = default)
         {
             _context.Users.Update(user);
-            return _context.SaveChangesAsync(cancellationToken);
+            var affected = await _context.SaveChangesAsync(cancellationToken);
+            return affected > 0
+                ? Result.Success()
+                : Result.Failure("User not found");
+
+
         }
     }
 }

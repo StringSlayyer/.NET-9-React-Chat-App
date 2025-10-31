@@ -57,6 +57,37 @@ namespace Chat.Application.Services
             return picture;
         }
 
+        public async Task<Result> UpdateProfileAsync(Guid userId, UpdateProfileDTO request, CancellationToken cancellationToken = default)
+        {
+            var user = await _userRepository.GetByIdAsync(userId) ?? throw new Exception("User not found");
+            user.FirstName = request.FirstName;
+            user.LastName = request.LastName;
+            user.Email = request.Email;
+
+            if(request.ProfilePicture != null)
+            {
+                var previousPath = user.ProfilePicturePath;
+                var path = await _fileStorageService.UploadFile(userId, request.ProfilePicture);
+                if (path.IsSuccess)
+                {
+
+                    user.ProfilePicturePath = path.Data;
+                    if (!string.IsNullOrWhiteSpace(previousPath))
+                    {
+                         _fileStorageService.DeleteFile(previousPath);
+                    }
+                }
+                else
+                {
+                    return new Result { IsSuccess = false, ErrorMessage = path.ErrorMessage };
+                }
+            }
+            
+
+            await _userRepository.UpdateUser(user);
+            return new Result { IsSuccess = true };
+        }
+
         public async Task UploadProfilePictureAsync(Guid userId, IFormFile file)
         {
             var user = await _userRepository.GetByIdAsync(userId) ?? throw new Exception("User not found");

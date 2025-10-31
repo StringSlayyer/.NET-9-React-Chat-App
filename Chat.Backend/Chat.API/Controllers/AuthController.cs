@@ -39,5 +39,13 @@ namespace Chat.API.Controllers
             var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
             return Ok(new {UserId = userId });
         }
+
+        [HttpPost("changePassword")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO model)
+        {
+            var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
+            var result = await _authService.ChangePasswordAsync(userId, model);
+            return Ok(result);
+        }
     }
 }

@@ -15,6 +15,8 @@ namespace Chat.Application.Interfaces
         Task<IEnumerable<UserDto>> GetAllUsersAsync(CancellationToken cancellationToken = default);
         Task<Result<ReturnFileDTO>> GetProfilePictureAsync(Guid guid);
         Task UploadProfilePictureAsync(Guid userId, IFormFile file);
+        Task<Result> UpdateProfileAsync(Guid userId, UpdateProfileDTO request, CancellationToken cancellationToken = default);
+        
 
     }
 }

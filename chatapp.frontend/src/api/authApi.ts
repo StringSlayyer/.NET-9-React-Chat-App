@@ -25,6 +25,11 @@ export interface TokenResponse {
   token: string;
 }
 
+export interface ChangePasswordDTO {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export const login = async (data: LoginDTO): Promise<Result<TokenResponse>> => {
   const response = await axios.post(`${API_URL}/login`, data);
   return response.data as Result<TokenResponse>;
@@ -48,4 +53,16 @@ export const getUserId = async (token: string): Promise<UserIdResponse> => {
     },
   });
   return response.data as UserIdResponse;
+};
+
+export const updatePassword = async (
+  data: ChangePasswordDTO,
+  token: string
+): Promise<Result> => {
+  const response = await axios.post(`${API_URL}/changePassword`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data as Result;
 };
