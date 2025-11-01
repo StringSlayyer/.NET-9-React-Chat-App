@@ -91,7 +91,7 @@ const ChatPage = () => {
           onLogout={onLogout}
         />
       </div>
-      <div className="flex-1 py-1 bg-gray-800">
+      <div className="flex-1 bg-gray-800">
         <ChatWindow
           conversation={selectedConversation}
           loggedUserId={loggedUser ? loggedUser.id : ""}

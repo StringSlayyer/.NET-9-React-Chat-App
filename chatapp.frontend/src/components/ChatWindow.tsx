@@ -5,6 +5,7 @@ import { getMessagesPaged, type Message } from "../api/messageApi";
 import { useAuth } from "../context/AuthContext";
 import type { ConversationDTO } from "../api/conversationApi";
 import { startConnection, getConnection } from "../api/signalService";
+import UserSidebar from "./UserSidebar";
 
 interface ChatWindowProps {
   conversation?: ConversationDTO | null;
@@ -122,17 +123,28 @@ const ChatWindow = ({ conversation, loggedUserId }: ChatWindowProps) => {
   }
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex-1 min-h-0">
-        <MessageList
-          messages={messages}
-          loading={loading}
-          loggedUserId={loggedUserId}
-        />
+    <div className="h-full flex flex-row">
+      {/* Chat section */}
+      <div className="flex flex-col flex-1 border-r border-gray-800">
+        <div className="flex-1 min-h-0">
+          <MessageList
+            messages={messages}
+            loading={loading}
+            loggedUserId={loggedUserId}
+          />
+        </div>
+        <div className="p-4 border-t border-gray-700">
+          <MessageInput onSend={handleSendMessage} />
+        </div>
       </div>
-      <div className=" p-4  border-t border-gray-700">
-        <MessageInput onSend={handleSendMessage} />
-      </div>
+
+      {/* Sidebar section */}
+      <UserSidebar
+        conversation={conversation}
+        messages={messages}
+        loggedUserId={loggedUserId}
+        token={token}
+      />
     </div>
   );
 };

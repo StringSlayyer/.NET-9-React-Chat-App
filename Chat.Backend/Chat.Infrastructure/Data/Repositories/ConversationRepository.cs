@@ -155,6 +155,7 @@ namespace Chat.Infrastructure.Data.Repositories
             foreach (var message in messages)
             {
                 message.IsRead = true;
+                message.ReadAt = DateTime.UtcNow;
             }
 
             await _context.SaveChangesAsync();

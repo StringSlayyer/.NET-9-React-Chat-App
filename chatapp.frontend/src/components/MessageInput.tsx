@@ -26,9 +26,9 @@ const MessageInput = ({ onSend }: MessageInputProps) => {
       />
       <button
         onClick={handleSend}
-        className="bg-blue-500 px-4 py-2 rounded text-white hover:bg-blue-600"
+        className="bg-gray-950 px-4 py-2 rounded text-white hover:bg-gray-600 transition duration-300 ease-in-out"
       >
-        Odeslat
+        Send
       </button>
     </div>
   );

@@ -173,7 +173,8 @@ namespace Chat.Application.Services
                 ConversationId = conversationId,
                 SenderId = userId,
                 Content = content,
-                SentAt = DateTime.UtcNow
+                SentAt = DateTime.UtcNow,
+                ReadAt = null
             };
             await _messageRepository.AddAsync(message, cancellationToken);
             return message;

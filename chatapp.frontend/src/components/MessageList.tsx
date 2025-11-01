@@ -21,7 +21,7 @@ const MessageList = ({
   }
 
   return (
-    <div className="h-full overflow-y-auto p-4">
+    <div className="h-full overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900 hover:scrollbar-thumb-gray-600">
       <div className="space-y-3">
         {messages.map((msg) => {
           const isMine = msg.senderId === loggedUserId;
@@ -36,8 +36,8 @@ const MessageList = ({
               key={msg.id}
               className={`p-2 rounded max-w-xs break-words ${
                 isMine
-                  ? "bg-blue-500 ml-auto text-white"
-                  : "bg-gray-600 text-white"
+                  ? "bg-gray-950 ml-auto text-white"
+                  : "bg-gray-700 text-white"
               }`}
             >
               <p className="text-sm">{msg.content}</p>
